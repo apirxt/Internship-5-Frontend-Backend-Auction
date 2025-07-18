@@ -1,0 +1,146 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Auction_back.Models
+{
+    public class AuctionMetadata
+    {
+    }
+    [MetadataType(typeof(AuctionMetadata))]
+    public partial class Auction
+    {
+        public Auction Create(AuctiondbContext context)
+        {
+            DateTime datenow = DateTime.Now;
+            this.IsDelete = false;
+            CreateBy = "Create";
+            CreateDate = datenow;
+            UpdateBy = "Create";
+            UpdateDate = datenow;
+
+            if (this.AuctionCategories != null)
+            {
+                foreach (AuctionCategory cat in this.AuctionCategories)
+                {
+                    cat.Create(this, datenow);
+                }
+            }
+
+            context.Auctions.Add(this);
+            return this;
+        }
+
+        public Auction Edit(AuctiondbContext context, Auction updateData)
+        {
+            if (this.Id <= 0)
+            {
+                throw new InvalidOperationException("Cannot edit Auction without valid Id.");
+            }
+
+            // Map property ที่ต้องการแก้ไขจาก updateData มายัง this
+            this.MetaAuctionTypeId = updateData.MetaAuctionTypeId;
+            this.AuctionName = updateData.AuctionName;
+            this.Status = updateData.Status;
+            this.Description = updateData.Description;
+            this.StartDate = updateData.StartDate;
+            this.EndDate = updateData.EndDate;
+            // ไม่ควร map Id, CreateBy, CreateDate, IsDelete, UpdateBy, UpdateDate ตรง ๆ
+            // ไม่ควร map AuctionCategories ตรง ๆ (ใช้ cascade ด้านล่าง)
+
+            DateTime datenow = DateTime.Now;
+            this.UpdateBy = "Edit";
+            this.UpdateDate = datenow;
+
+            if (this.AuctionCategories != null && updateData.AuctionCategories != null)
+            {
+                foreach (AuctionCategory cat in this.AuctionCategories)
+                {
+                    AuctionCategory? updateCat = updateData.AuctionCategories.FirstOrDefault(c => c.Id == cat.Id);
+                    if (cat.Id > 0 && updateCat != null)
+                    {
+                        cat.Edit(this, datenow, context, updateCat);
+                    }
+                }
+                // Add new AuctionCategory (id == 0)
+                foreach (AuctionCategory newCat in updateData.AuctionCategories.Where(c => c.Id == 0))
+                {
+                    newCat.AuctionId = this.Id;
+                    newCat.Create(this, datenow);
+                    context.AuctionCategories.Add(newCat);
+                }
+            }
+
+            context.Auctions.Update(this);
+            return this;
+        }
+
+        public Auction Delete(AuctiondbContext context, Auction auction)
+        {
+            if (this.Id <= 0)
+            {
+                throw new InvalidOperationException("Cannot delete Auction without valid Id.");
+            }
+
+            DateTime datenow = DateTime.Now;
+
+            auction.IsDelete = true;
+            auction.UpdateBy = "Delete";
+            auction.UpdateDate = datenow;
+
+            foreach (var category in auction.AuctionCategories)
+            {
+                category.IsDelete = true;
+                category.UpdateBy = "Delete";
+                category.UpdateDate = datenow;
+
+                foreach (var criterion in category.Criteria)
+                {
+                    criterion.IsDelete = true;
+                    criterion.UpdateBy = "Delete";
+                    criterion.UpdateDate = datenow;
+
+                    foreach (var user in criterion.CriteriaUsers)
+                    {
+                        user.IsDelete = true;
+                        user.UpdateBy = "Delete";
+                        user.UpdateDate = datenow;
+
+                        foreach (var credit in user.Credits)
+                        {
+                            credit.IsDelete = true;
+                            credit.UpdateBy = "Delete";
+                            credit.UpdateDate = datenow;
+                        }
+
+                        foreach (var debit in user.Debits)
+                        {
+                            debit.IsDelete = true;
+                            debit.UpdateBy = "Delete";
+                            debit.UpdateDate = datenow;
+                        }
+
+                        foreach (var marginal in user.MarginalCredits)
+                        {
+                            marginal.IsDelete = true;
+                            marginal.UpdateBy = "Delete";
+                            marginal.UpdateDate = datenow;
+                        }
+
+                        foreach (var amount in user.AuctionAmounts)
+                        {
+                            amount.IsDelete = true;
+                            amount.UpdateBy = "Delete";
+                            amount.UpdateDate = datenow;
+                        }
+                    }
+                }
+            }
+
+            this.IsDelete = true;
+            this.UpdateBy = "Delete";
+            this.UpdateDate = datenow;
+
+            context.Auctions.Update(this);
+            return this;
+        }
+    }
+}

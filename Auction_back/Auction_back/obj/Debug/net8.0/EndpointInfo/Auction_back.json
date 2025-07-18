@@ -1,0 +1,898 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Auction_back",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Auction": {
+      "post": {
+        "tags": [
+          "Auction"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auction/All": {
+      "get": {
+        "tags": [
+          "Auction"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auction/{id}": {
+      "get": {
+        "tags": [
+          "Auction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Auction"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Auction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auction"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/WeatherForecast": {
+      "get": {
+        "tags": [
+          "WeatherForecast"
+        ],
+        "operationId": "GetWeatherForecast",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeatherForecast"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Auction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metaAuctionTypeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "auctionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "auctionCategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuctionCategory"
+            },
+            "nullable": true
+          },
+          "metaAuctionType": {
+            "$ref": "#/components/schemas/MetaAuctionType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuctionAmount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuctionCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "auctionId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metaCategoryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            },
+            "nullable": true
+          },
+          "metaCategory": {
+            "$ref": "#/components/schemas/MetaCategory"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Credit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "credit1": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CriteriaUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metaUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "auctionAmounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuctionAmount"
+            },
+            "nullable": true
+          },
+          "credits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Credit"
+            },
+            "nullable": true
+          },
+          "debits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Debit"
+            },
+            "nullable": true
+          },
+          "marginalCredits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarginalCredit"
+            },
+            "nullable": true
+          },
+          "metaUser": {
+            "$ref": "#/components/schemas/MetaUser"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Criterion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "auctionCategoryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metaCriteriaTypeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isCheck": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "criteriaUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CriteriaUser"
+            },
+            "nullable": true
+          },
+          "metaCriteriaType": {
+            "$ref": "#/components/schemas/MetaCriteriaType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Debit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metaMoneyTypeId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cash": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "metaMoneyType": {
+            "$ref": "#/components/schemas/MetaMoneyType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarginalCredit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaUserId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "percent": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "isNonLimit": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetaAuctionType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "auctionTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "auctions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Auction"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetaCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "categoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryHeaderId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "auctionCategories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuctionCategory"
+            },
+            "nullable": true
+          },
+          "categoryHeader": {
+            "$ref": "#/components/schemas/MetaCategory"
+          },
+          "inverseCategoryHeader": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetaCategory"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetaCriteriaType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "criteriaTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Criterion"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetaMoneyType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "moneyTypeName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "debits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Debit"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetaUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "createDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "nullable": true
+          },
+          "updateDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isDelete": {
+            "type": "boolean"
+          },
+          "criteriaUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CriteriaUser"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "WeatherForecast": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "temperatureC": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "temperatureF": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

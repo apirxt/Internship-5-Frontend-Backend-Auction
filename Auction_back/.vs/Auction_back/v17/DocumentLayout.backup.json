@@ -1,0 +1,110 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|c:\\users\\asus\\source\\repos\\internship-5-frontend-backend-auction\\auction_back\\auction_back\\controllers\\auctioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|solutionrelative:auction_back\\controllers\\auctioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|c:\\users\\asus\\source\\repos\\internship-5-frontend-backend-auction\\auction_back\\auction_back\\models\\criteriausermetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|solutionrelative:auction_back\\models\\criteriausermetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|c:\\users\\asus\\source\\repos\\internship-5-frontend-backend-auction\\auction_back\\auction_back\\models\\criteriametadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|solutionrelative:auction_back\\models\\criteriametadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|c:\\users\\asus\\source\\repos\\internship-5-frontend-backend-auction\\auction_back\\auction_back\\models\\auctionmetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|solutionrelative:auction_back\\models\\auctionmetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|c:\\users\\asus\\source\\repos\\internship-5-frontend-backend-auction\\auction_back\\auction_back\\models\\auctioncategorymetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{456B3A12-0257-46FC-8149-98666A6C88E9}|Auction_back\\Auction_back.csproj|solutionrelative:auction_back\\models\\auctioncategorymetadata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AuctionController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Controllers\\AuctionController.cs",
+              "RelativeDocumentMoniker": "Auction_back\\Controllers\\AuctionController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Controllers\\AuctionController.cs",
+              "RelativeToolTip": "Auction_back\\Controllers\\AuctionController.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAUwIoAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-26T11:17:15.395Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AuctionMetadata.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\AuctionMetadata.cs",
+              "RelativeDocumentMoniker": "Auction_back\\Models\\AuctionMetadata.cs",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\AuctionMetadata.cs",
+              "RelativeToolTip": "Auction_back\\Models\\AuctionMetadata.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-07T09:34:23.545Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuctionCategoryMetadata.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\AuctionCategoryMetadata.cs",
+              "RelativeDocumentMoniker": "Auction_back\\Models\\AuctionCategoryMetadata.cs",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\AuctionCategoryMetadata.cs",
+              "RelativeToolTip": "Auction_back\\Models\\AuctionCategoryMetadata.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAowBcAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-07T09:34:09.499Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CriteriaMetadata.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\CriteriaMetadata.cs",
+              "RelativeDocumentMoniker": "Auction_back\\Models\\CriteriaMetadata.cs",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\CriteriaMetadata.cs",
+              "RelativeToolTip": "Auction_back\\Models\\CriteriaMetadata.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-07T09:34:34.997Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CriteriaUserMetadata.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\CriteriaUserMetadata.cs",
+              "RelativeDocumentMoniker": "Auction_back\\Models\\CriteriaUserMetadata.cs",
+              "ToolTip": "C:\\Users\\ASUS\\source\\repos\\Internship-5-Frontend-Backend-Auction\\Auction_back\\Auction_back\\Models\\CriteriaUserMetadata.cs",
+              "RelativeToolTip": "Auction_back\\Models\\CriteriaUserMetadata.cs",
+              "ViewState": "AgIAAIAAAAAAAAAAAAAwwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-07T09:34:46.177Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
