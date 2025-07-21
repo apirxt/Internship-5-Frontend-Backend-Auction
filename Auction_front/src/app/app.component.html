@@ -1,2 +1,14 @@
 
-<router-outlet></router-outlet>
+<nav class="navbar">
+  <div class="nav-container">
+    <h1 class="nav-title">ระบบประมูล</h1>
+    <div class="nav-links">
+      <a routerLink="/auction/list" routerLinkActive="active">รายการประมูล</a>
+      <a routerLink="/auction/create" routerLinkActive="active">สร้างประมูลใหม่</a>
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>

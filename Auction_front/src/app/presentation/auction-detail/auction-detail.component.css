@@ -1,0 +1,418 @@
+/* CSS สำหรับหน้ารายละเอียดการประมูล - ใช้รูปแบบเดียวกับหน้า create แต่ปรับสำหรับ read-only */
+.auction-form-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+/* Header Section */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.form-title {
+  text-align: center;
+  margin: 0;
+  color: #333;
+  flex-grow: 1;
+}
+
+.btn-back {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-back:hover {
+  background-color: #5a6268;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.btn-edit:hover {
+  background-color: #e0a800;
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+.auction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+/* รวม input, select, textarea เข้าด้วยกัน */
+.form-input, 
+.form-select, 
+.form-textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+/* สไตล์สำหรับ readonly fields */
+.form-input.readonly,
+.form-textarea.readonly {
+  background-color: #f8f9fa;
+  color: #495057;
+  cursor: not-allowed;
+}
+
+.form-group-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-checkbox.disabled {
+  cursor: not-allowed;
+}
+
+.checkbox-label {
+  font-weight: bold;
+  color: #333;
+}
+
+/* สไตล์ส่วนหมวดหมู่ */
+.categories-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #fafafa;
+}
+
+.categories-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+.main-category-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #007bff;
+  border-radius: 3px;
+  background-color: white;
+}
+
+.main-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.main-category-name {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.sub-category-item {
+  margin-left: 20px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* No Categories Message */
+.no-categories {
+  text-align: center;
+  padding: 30px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Criteria section styles */
+.criteria-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+.criteria-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+.criteria-selection {
+  margin-bottom: 20px;
+}
+
+.criteria-checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.criteria-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: not-allowed;
+  accent-color: #007bff;
+}
+
+.criteria-checkbox:disabled {
+  opacity: 0.6;
+}
+
+/* CriteriaUser Details */
+.criteria-user-details {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.criteria-user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.criteria-user-header {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #e9ecef;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.criteria-user-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.criteria-user-label {
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 3px;
+}
+
+.criteria-user-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.criteria-user-input {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 90%;
+}
+
+.criteria-user-input.readonly {
+  background-color: #f8f9fa;
+  color: #495057;
+  cursor: not-allowed;
+}
+
+.criteria-user-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.criteria-user-checkbox-label {
+  font-size: 12px;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.user-type-column {
+  display: flex;
+  align-items: center;
+}
+
+.user-column {
+  text-align: center;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.user-info {
+  padding: 8px;
+  background-color: #e3f2fd;
+  border-radius: 3px;
+}
+
+.user-type-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 5px;
+}
+
+.user-name {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Small text styling */
+.small-text {
+  font-size: 0.8em;
+  color: #666;
+  font-weight: normal;
+}
+
+/* Audit Information Section */
+.audit-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  background-color: #f8f9fa;
+}
+
+.section-title {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+}
+
+.audit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 40px;
+  color: #dc3545;
+}
+
+.error-state h2 {
+  color: #dc3545;
+  margin-bottom: 15px;
+}
+
+.error-state p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .auction-form-container {
+    margin: 10px;
+    padding: 15px;
+    max-width: none;
+  }
+
+  .header-section {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .action-buttons {
+    justify-content: center;
+  }
+
+  .audit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .criteria-user-header,
+  .criteria-user-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .criteria-user-label {
+    margin-bottom: 10px;
+  }
+
+  .criteria-user-cell {
+    margin-bottom: 15px;
+  }
+
+  .criteria-user-input {
+    width: 100%;
+  }
+}

@@ -1,1 +1,66 @@
-<p>auction-list works!</p>
+<div class="container">
+  <div class="header">
+    <h1>รายการประมูล</h1>
+    <button class="btn-create" type="button" (click)="createNew()">สร้างใหม่</button>
+  </div>
+
+  <div class="search-section">
+    <input 
+      type="text" 
+      [(ngModel)]="searchTerm" 
+      (input)="search()" 
+      placeholder="ค้นหาประมูล..." 
+      class="search-input"
+    >
+    <button class="btn-search" type="button" (click)="search()">ค้นหา</button>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">
+    กำลังโหลดข้อมูล...
+  </div>
+
+  <div class="table-container" *ngIf="!isLoading">
+    <table class="auction-table">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ชื่อประมูล</th>
+          <th>ประเภทประมูล</th>
+          <th>สถานะ</th>
+          <th>วันที่เริ่มต้น</th>
+          <th>วันที่สิ้นสุด</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let auction of filteredAuctions; let i = index" class="table-row">
+          <td>{{ i + 1 }}</td>
+          <td class="auction-name">
+            <div class="name-cell">
+              <strong>{{ auction.auctionName || 'ไม่ระบุชื่อ' }}</strong>
+              <div class="description" *ngIf="auction.description">
+                {{ auction.description }}
+              </div>
+            </div>
+          </td>
+          <td>{{ auction.metaAuctionType?.auctionTypeName || '-' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="auction.status ? 'status-active' : 'status-inactive'">
+              {{ auction.status ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </span>
+          </td>
+          <td>{{ formatDate(auction.startDate) }}</td>
+          <td>{{ formatDate(auction.endDate) }}</td>
+          <td class="manage-cell">
+            <button class="btn-detail" (click)="viewDetails(auction.id)">ดูรายละเอียด</button>
+            <button class="btn-edit" (click)="editAuction(auction.id)">แก้ไข</button>
+            <button class="btn-delete" (click)="deleteAuction(auction.id)">ลบ</button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAuctions.length === 0" class="no-data">
+          <td colspan="7" class="text-center">ไม่พบข้อมูลประมูล</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

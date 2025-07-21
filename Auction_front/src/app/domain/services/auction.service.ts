@@ -12,11 +12,11 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuctionService {
-  private baseUrl = 'https://localhost:7087/api/Auction';
-  private metaAuctionTypeUrl = 'https://localhost:7087/api/MetaAuctionType';
-  private metaCategoryUrl = 'https://localhost:7087/api/MetaCategory';
-  private metaCriteriaTypeUrl = 'https://localhost:7087/api/MetaCriteriaType';
-  private metaMoneyTypeUrl = 'https://localhost:7087/api/MetaMoneyType';
+  private baseUrl = 'http://localhost:5186/api/Auction';
+  private metaAuctionTypeUrl = 'http://localhost:5186/api/MetaAuctionType';
+  private metaCategoryUrl = 'http://localhost:5186/api/MetaCategory';
+  private metaCriteriaTypeUrl = 'http://localhost:5186/api/MetaCriteriaType';
+  private metaMoneyTypeUrl = 'http://localhost:5186/api/MetaMoneyType';
 
   constructor(private http: HttpClient) { }
 
@@ -53,7 +53,7 @@ export class AuctionService {
 
   // Meta User methods
   getAllMetaUsers(): Observable<MetaUser[]> {
-    return this.http.get<MetaUser[]>('https://localhost:7087/api/MetaUser');
+    return this.http.get<MetaUser[]>('http://localhost:5186/api/MetaUser');
   }
 
   // Meta Criteria Type methods

@@ -1,0 +1,302 @@
+<div class="auction-form-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button class="btn-back" (click)="goBack()">← กลับ</button>
+    <h2 class="form-title">รายละเอียดการประมูล</h2>
+    <div class="action-buttons">
+      <button class="btn-edit" (click)="editAuction()">แก้ไข</button>
+      <button class="btn-delete" (click)="deleteAuction()">ลบ</button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="isLoading">
+    กำลังโหลดข้อมูล...
+  </div>
+
+  <!-- Auction Detail Form (Read-only) -->
+  <div class="auction-form" *ngIf="!isLoading && auction">
+    <!-- Auction Name -->
+    <div class="form-group">
+      <label class="form-label">ชื่อการประมูล:</label>
+      <input 
+        type="text" 
+        [value]="auction.auctionName || '-'"
+        readonly
+        aria-label="ชื่อการประมูล"
+        class="form-input readonly">
+    </div>
+
+    <!-- Auction Type -->
+    <div class="form-group">
+      <label class="form-label">ประเภทการประมูล:</label>
+      <input 
+        type="text" 
+        [value]="getAuctionTypeName(auction.metaAuctionTypeId)"
+        readonly
+        aria-label="ประเภทการประมูล"
+        class="form-input readonly">
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label class="form-label">รายละเอียด:</label>
+      <textarea 
+        [value]="auction.description || '-'"
+        readonly
+        rows="4"
+        aria-label="รายละเอียด"
+        class="form-textarea readonly">
+      </textarea>
+    </div>
+
+    <!-- Start Date -->
+    <div class="form-group">
+      <label class="form-label">วันที่เริ่มต้น:</label>
+      <input 
+        type="text" 
+        [value]="formatDate(auction.startDate)"
+        readonly
+        aria-label="วันที่เริ่มต้น"
+        class="form-input readonly">
+    </div>
+
+    <!-- End Date -->
+    <div class="form-group">
+      <label class="form-label">วันที่สิ้นสุด:</label>
+      <input 
+        type="text" 
+        [value]="formatDate(auction.endDate)"
+        readonly
+        aria-label="วันที่สิ้นสุด"
+        class="form-input readonly">
+    </div>
+
+    <!-- Status -->
+    <div class="form-group-checkbox">
+      <input 
+        type="checkbox" 
+        [checked]="auction.status"
+        disabled
+        aria-label="สถานะเปิดใช้งาน"
+        class="form-checkbox disabled">
+      <label class="checkbox-label">เปิดใช้งาน</label>
+    </div>
+
+    <!-- Auction Categories Section -->
+    <div class="categories-section">
+      <h3 class="categories-title">หมวดหมู่การประมูล</h3>
+      
+      <!-- Display Categories -->
+      <div *ngIf="getDisplayCategories().length > 0">
+        <div *ngFor="let mainCat of getDisplayCategories(); let mainIndex = index" class="main-category-item">
+          <div class="main-category-header">
+            <strong class="main-category-name">{{mainCat.categoryName}}</strong>
+          </div>
+
+          <!-- Sub Categories -->
+          <div *ngFor="let subCat of mainCat.subCategories; let subIndex = index" class="sub-category-item">
+            <span>• {{subCat.categoryName}}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- No Categories Message -->
+      <div *ngIf="getDisplayCategories().length === 0" class="no-categories">
+        <p>ไม่มีหมวดหมู่การประมูล</p>
+      </div>
+    </div>
+
+    <!-- Criteria Section -->
+    <div class="criteria-section">
+      <h3 class="criteria-title">เกณฑ์การประมูล</h3>
+      
+      <!-- Criteria Selection Display (Read-only) -->
+      <div class="criteria-selection">
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            [checked]="hasDebitCriteria()"
+            disabled
+            title="สถานะเกณฑ์จำนวนเงินที่วาง"
+            class="criteria-checkbox">
+          <label>จำนวนเงินที่วาง (Debit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            [checked]="hasCreditCriteria()"
+            disabled
+            title="สถานะเกณฑ์เครดิต"
+            class="criteria-checkbox">
+          <label>เครดิต (Credit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            [checked]="hasMarginalCreditCriteria()"
+            disabled
+            title="สถานะเกณฑ์วงเงินเพิ่มเติม"
+            class="criteria-checkbox">
+          <label>วงเงินเพิ่มเติม (MarginalCredit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            [checked]="hasAuctionAmountCriteria()"
+            disabled
+            title="สถานะเกณฑ์ประมูลได้"
+            class="criteria-checkbox">
+          <label>ประมูลได้ (AuctionAmount)</label>
+        </div>
+      </div>
+      
+      <!-- CriteriaUser Details Table (Read-only) -->
+      <div class="criteria-user-details">
+        <div class="criteria-user-table">
+          <div class="criteria-user-header">
+            <div class="user-type-column"></div>
+            <div class="user-column" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <div class="user-info">
+                <div class="user-type-title">{{userType}}</div>
+                <div class="user-name">
+                  {{getDisplayUserName(userType)}}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debit Row -->
+          <div class="criteria-user-row debit-row" *ngIf="hasDebitCriteria()">
+            <div class="criteria-user-label">จำนวนเงินที่วาง (Debit)</div>
+            <div class="criteria-user-cell debit-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <!-- Money Type Display -->
+              <input 
+                type="text"
+                [value]="getDebitMoneyType(i)"
+                readonly
+                title="ประเภทเงินสำหรับ {{userType}}"
+                class="criteria-user-input readonly"
+                [attr.aria-label]="'ประเภทเงินสำหรับ ' + userType">
+              <!-- Amount Display -->
+              <input 
+                type="text" 
+                [value]="getDebitAmount(i)"
+                readonly
+                title="จำนวนเงินที่วาง Debit สำหรับ {{userType}}"
+                class="criteria-user-input readonly"
+                [attr.aria-label]="'จำนวนเงินที่วาง Debit สำหรับ ' + userType">
+            </div>
+          </div>
+
+          <!-- Credit Row -->
+          <div class="criteria-user-row credit-row" *ngIf="hasCreditCriteria()">
+            <div class="criteria-user-label">เครดิต (Credit)</div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="text" 
+                [value]="getCreditAmount(i)"
+                readonly
+                title="จำนวนเครดิตสำหรับ {{userType}}"
+                class="criteria-user-input readonly"
+                [attr.aria-label]="'จำนวนเครดิตสำหรับ ' + userType">
+            </div>
+          </div>
+
+          <!-- MarginalCredit Row -->
+          <div class="criteria-user-row marginal-credit-row" *ngIf="hasMarginalCreditCriteria()">
+            <div class="criteria-user-label">วงเงินเพิ่มเติม <span class="small-text">*ไม่เกิน(%)</span></div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="text" 
+                [value]="getMarginalCreditPercent(i)"
+                readonly
+                title="เปอร์เซ็นต์เพิ่มเติมสำหรับ {{userType}}"
+                class="criteria-user-input readonly"
+                [attr.aria-label]="'เปอร์เซ็นต์เพิ่มเติมสำหรับ ' + userType">
+              <div class="criteria-user-checkbox-wrapper">
+                <label class="criteria-user-checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    [checked]="getMarginalCreditNonLimit(i)"
+                    disabled
+                    title="ไม่จำกัดวงเงินสำหรับ {{userType}}"
+                    [attr.aria-label]="'ไม่จำกัดวงเงินสำหรับ ' + userType">
+                  ไม่จำกัดวงเงิน
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- AuctionAmount Row -->
+          <div class="criteria-user-row auction-amount-row" *ngIf="hasAuctionAmountCriteria()">
+            <div class="criteria-user-label">ประมูลได้ <span class="small-text">*ไม่เกิน(รายการ)</span></div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="text" 
+                [value]="getAuctionAmountValue(i)"
+                readonly
+                title="จำนวนรายการประมูลสำหรับ {{userType}}"
+                class="criteria-user-input readonly"
+                [attr.aria-label]="'จำนวนรายการประมูลสำหรับ ' + userType">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Information -->
+    <div class="audit-section">
+      <h3 class="section-title">ข้อมูลการสร้างและแก้ไข</h3>
+      <div class="audit-grid">
+        <div class="form-group">
+          <label class="form-label">สร้างโดย:</label>
+          <input 
+            type="text" 
+            [value]="auction.createBy || '-'"
+            readonly
+            aria-label="สร้างโดย"
+            class="form-input readonly">
+        </div>
+        <div class="form-group">
+          <label class="form-label">วันที่สร้าง:</label>
+          <input 
+            type="text" 
+            [value]="formatDate(auction.createDate)"
+            readonly
+            aria-label="วันที่สร้าง"
+            class="form-input readonly">
+        </div>
+        <div class="form-group">
+          <label class="form-label">แก้ไขโดย:</label>
+          <input 
+            type="text" 
+            [value]="auction.updateBy || '-'"
+            readonly
+            aria-label="แก้ไขโดย"
+            class="form-input readonly">
+        </div>
+        <div class="form-group">
+          <label class="form-label">วันที่แก้ไข:</label>
+          <input 
+            type="text" 
+            [value]="formatDate(auction.updateDate)"
+            readonly
+            aria-label="วันที่แก้ไข"
+            class="form-input readonly">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!isLoading && !auction">
+    <h2>ไม่พบข้อมูลประมูล</h2>
+    <p>ไม่สามารถโหลดรายละเอียดประมูลได้</p>
+    <button class="btn-back" (click)="goBack()">กลับไปหน้ารายการ</button>
+  </div>
+</div>
