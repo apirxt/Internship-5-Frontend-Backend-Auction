@@ -336,12 +336,18 @@
   gap: 5px;
 }
 
-.criteria-user-select,
+.criteria-user-select{
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  width: 104%;
+}
+
 .criteria-user-input {
   padding: 6px;
   border: 1px solid #ccc;
   border-radius: 3px;
-  width: 100%;
+  width: 90%;
 }
 
 .criteria-user-checkbox-wrapper {

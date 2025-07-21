@@ -190,11 +190,11 @@ export class AuctionCreateComponent implements OnInit {
           };
 
           // เพิ่มข้อมูลตามประเภท criteria โดยสร้าง child objects
-          if (key === 'debit' && userData.debitAmount) {
+          if (key === 'debit' && userData.debitAmount && userData.selectedMoneyTypeId) {
             criteriaUser.debits = [{
               id: 0,
               criteriaUserId: 0,
-              metaMoneyTypeId: userData.selectedMoneyTypeId || 1,
+              metaMoneyTypeId: userData.selectedMoneyTypeId,
               cash: parseFloat(userData.debitAmount),
               isDelete: false,
               createBy: 'system',
@@ -217,11 +217,12 @@ export class AuctionCreateComponent implements OnInit {
             }];
           }
 
-          if (key === 'marginalCredit' && userData.marginalCreditPercent) {
+          if (key === 'marginalCredit' && 
+              (userData.marginalCreditPercent || userData.marginalCreditNonLimit)) {
             criteriaUser.marginalCredits = [{
               id: 0,
               criteriaUserId: 0,
-              percent: parseFloat(userData.marginalCreditPercent),
+              percent: userData.marginalCreditNonLimit ? null : parseFloat(userData.marginalCreditPercent),
               isNonLimit: userData.marginalCreditNonLimit || false,
               isDelete: false,
               createBy: 'system',
@@ -508,5 +509,86 @@ export class AuctionCreateComponent implements OnInit {
         }
       }
     }
+  }
+
+  onMarginalCreditNonLimitChange(criteriaKey: string | number, userTypeIndex: number, isChecked: boolean): void {
+    if (this.criteriaUsersData[criteriaKey] && this.criteriaUsersData[criteriaKey][userTypeIndex]) {
+      // Set the checkbox value
+      this.criteriaUsersData[criteriaKey][userTypeIndex].marginalCreditNonLimit = isChecked;
+      
+      // If checkbox is checked, clear the percent value and disable input
+      if (isChecked) {
+        this.criteriaUsersData[criteriaKey][userTypeIndex].marginalCreditPercent = null;
+      }
+      
+      // Auto-assign metaUserId based on userType
+      const userTypes = ['General', 'Member', 'VIP'];
+      if (userTypeIndex < userTypes.length) {
+        const userType = userTypes[userTypeIndex];
+        const usersForType = this.getUsersByType(userType);
+        if (usersForType.length > 0) {
+          this.criteriaUsersData[criteriaKey][userTypeIndex].metaUserId = usersForType[0].id;
+        }
+      }
+    }
+  }
+
+  // Methods for Debit Money Type handling
+  onDebitMoneyTypeChange(userTypeIndex: number, moneyTypeId: string): void {
+    if (this.criteriaUsersData['debit'] && this.criteriaUsersData['debit'][userTypeIndex]) {
+      const id = parseInt(moneyTypeId);
+      this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId = id || null;
+      
+      // Clear the amount when changing money type
+      this.criteriaUsersData['debit'][userTypeIndex].debitAmount = null;
+      
+      // Auto-assign metaUserId based on userType
+      const userTypes = ['General', 'Member', 'VIP'];
+      if (userTypeIndex < userTypes.length) {
+        const userType = userTypes[userTypeIndex];
+        const usersForType = this.getUsersByType(userType);
+        if (usersForType.length > 0) {
+          this.criteriaUsersData['debit'][userTypeIndex].metaUserId = usersForType[0].id;
+        }
+      }
+    }
+  }
+
+  getPlaceholderForDebit(userTypeIndex: number): string {
+    if (!this.criteriaUsersData['debit'] || !this.criteriaUsersData['debit'][userTypeIndex]) {
+      return 'เลือกประเภทก่อน';
+    }
+
+    const selectedMoneyTypeId = this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId;
+    if (!selectedMoneyTypeId) {
+      return 'เลือกประเภทก่อน';
+    }
+
+    const selectedMoneyType = this.metaMoneyTypes.find(mt => mt.id === selectedMoneyTypeId);
+    if (!selectedMoneyType || !selectedMoneyType.moneyTypeName) {
+      return 'เลือกประเภทก่อน';
+    }
+
+    // Check if it's Amount or Percent based on the money type name
+    const moneyTypeName = selectedMoneyType.moneyTypeName.toLowerCase();
+    if (moneyTypeName.includes('percent') || moneyTypeName.includes('%')) {
+      return '15%';
+    } else {
+      return '20,000.00';
+    }
+  }
+
+  getSelectedMoneyTypeName(userTypeIndex: number): string {
+    if (!this.criteriaUsersData['debit'] || !this.criteriaUsersData['debit'][userTypeIndex]) {
+      return '';
+    }
+
+    const selectedMoneyTypeId = this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId;
+    if (!selectedMoneyTypeId) {
+      return '';
+    }
+
+    const selectedMoneyType = this.metaMoneyTypes.find(mt => mt.id === selectedMoneyTypeId);
+    return selectedMoneyType && selectedMoneyType.moneyTypeName ? selectedMoneyType.moneyTypeName : '';
   }
 }

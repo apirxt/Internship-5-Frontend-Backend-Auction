@@ -230,15 +230,33 @@
           <!-- Debit Row - แสดงเมื่อเลือก Debit checkbox -->
           <div class="criteria-user-row debit-row" *ngIf="isCriteriaSelected('debit')">
             <div class="criteria-user-label">จำนวนเงินที่วาง (Debit)</div>
-            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+            <div class="criteria-user-cell debit-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <!-- Money Type Dropdown with accessible label -->
+              <select 
+                [id]="'debitMoneyType-' + i"
+                class="criteria-user-select debit-select"
+                [name]="'debitMoneyType-' + i"
+                [value]="getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId || ''"
+                (change)="onDebitMoneyTypeChange(i, $any($event.target).value)"
+                title="เลือกประเภทเงิน"
+                [attr.aria-label]="'เลือกประเภทเงินสำหรับ ' + userType">
+                <option value="">เลือกประเภท</option>
+                <option *ngFor="let moneyType of metaMoneyTypes" [value]="moneyType.id">
+                  {{moneyType.moneyTypeName}}
+                </option>
+              </select>
+              <!-- Amount Input with accessible label -->
               <input 
+                [id]="'debitAmount-' + i"
                 type="number" 
-                class="criteria-user-input"
+                class="criteria-user-input debit-input"
                 [name]="'debitAmount-' + i"
-                placeholder="20,000.00"
+                [placeholder]="getPlaceholderForDebit(i)"
                 [value]="getCriteriaUsersData('debit')[i]?.debitAmount || ''"
+                [disabled]="!getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId"
                 (input)="updateCriteriaUserData('debit', i, 'debitAmount', $any($event.target).value)"
-                [title]="'จำนวนเงินที่วาง Debit สำหรับ ' + userType">
+                title="กรอกจำนวนเงิน"
+                [attr.aria-label]="'จำนวนเงินที่วาง Debit สำหรับ ' + userType">
             </div>
           </div>
 
@@ -267,6 +285,7 @@
                 placeholder="15%"
                 [name]="'marginalCreditPercent-' + i"
                 [value]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditPercent || ''"
+                [disabled]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
                 (input)="updateCriteriaUserData('marginalCredit', i, 'marginalCreditPercent', $any($event.target).value)"
                 [title]="'เปอร์เซ็นต์เพิ่มเติมสำหรับ ' + userType">
               <div class="criteria-user-checkbox-wrapper">
@@ -276,7 +295,7 @@
                     [id]="'marginalCreditNonLimit-' + i"
                     [name]="'marginalCreditNonLimit-' + i"
                     [checked]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
-                    (change)="updateCriteriaUserData('marginalCredit', i, 'marginalCreditNonLimit', $any($event.target).checked)"
+                    (change)="onMarginalCreditNonLimitChange('marginalCredit', i, $any($event.target).checked)"
                     [title]="'ไม่จำกัดวงเงินสำหรับ ' + userType"
                     [attr.aria-label]="'ไม่จำกัดวงเงินสำหรับ ' + userType">
                   ไม่จำกัดวงเงิน

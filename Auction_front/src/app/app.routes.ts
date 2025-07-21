@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
-import { AuctionComponent } from './presentation/auction/auction.component';
+import { AuctionCreateComponent } from './presentation/auction-create/auction-create.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/auction/create', pathMatch: 'full' },
-    { path: 'auction/create', component: AuctionComponent },
+    { path: 'auction/create', component: AuctionCreateComponent },
     { path: '**', redirectTo: '/auction/create' }
 ];

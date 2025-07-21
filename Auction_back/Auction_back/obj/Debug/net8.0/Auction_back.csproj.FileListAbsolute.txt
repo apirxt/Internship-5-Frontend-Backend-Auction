@@ -547,3 +547,8 @@ C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Au
 C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\Auction_back.pdb
 C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\Auction_back.genruntimeconfig.cache
 C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\ref\Auction_back.dll
+C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\Auction_back.sourcelink.json
+C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\ASUS\source\repos\Internship-5-Frontend-Backend-Auction\Auction_back\Auction_back\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
