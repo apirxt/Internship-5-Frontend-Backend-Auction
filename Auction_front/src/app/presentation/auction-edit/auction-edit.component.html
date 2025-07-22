@@ -1,0 +1,378 @@
+<div class="auction-form-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <button class="btn-back" (click)="goBack()">← กลับ</button>
+    <h2 class="form-title">แก้ไขการประมูล</h2>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading" *ngIf="isLoading">
+    กำลังโหลดข้อมูล...
+  </div>
+
+  <!-- Auction Edit Form -->
+  <form (ngSubmit)="onSubmit()" #auctionForm="ngForm" class="auction-form" *ngIf="!isLoading && auction">
+    <!-- Auction Name -->
+    <div class="form-group">
+      <label class="form-label">ชื่อการประมูล:</label>
+      <input 
+        type="text" 
+        [(ngModel)]="auction.auctionName"
+        name="auctionName"
+        required
+        placeholder="กรุณาใส่ชื่อการประมูล"
+        aria-label="ชื่อการประมูล"
+        class="form-input">
+    </div>
+
+    <!-- Auction Type -->
+    <div class="form-group">
+      <label class="form-label">ประเภทการประมูล:</label>
+      <select 
+        [(ngModel)]="auction.metaAuctionTypeId"
+        name="metaAuctionTypeId"
+        required
+        title="เลือกประเภทการประมูล"
+        aria-label="ประเภทการประมูล"
+        class="form-select">
+        <option [ngValue]="null" disabled>เลือกประเภทการประมูล</option>
+        <option *ngFor="let type of auctionTypes" [value]="type.id">
+          {{type.auctionTypeName}}
+        </option>
+      </select>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label class="form-label">รายละเอียด:</label>
+      <textarea 
+        [(ngModel)]="auction.description"
+        name="description"
+        rows="4"
+        placeholder="กรุณาใส่รายละเอียดการประมูล"
+        aria-label="รายละเอียด"
+        class="form-textarea">
+      </textarea>
+    </div>
+
+    <!-- Start Date -->
+    <div class="form-group">
+      <label class="form-label">วันที่เริ่มต้น:</label>
+      <input 
+        type="datetime-local" 
+        [(ngModel)]="auction.startDate"
+        name="startDate"
+        required
+        title="เลือกวันที่และเวลาเริ่มต้น"
+        aria-label="วันที่เริ่มต้น"
+        class="form-input">
+    </div>
+
+    <!-- End Date -->
+    <div class="form-group">
+      <label class="form-label">วันที่สิ้นสุด:</label>
+      <input 
+        type="datetime-local" 
+        [(ngModel)]="auction.endDate"
+        name="endDate"
+        required
+        title="เลือกวันที่และเวลาสิ้นสุด"
+        aria-label="วันที่สิ้นสุด"
+        class="form-input">
+    </div>
+
+    <!-- Status -->
+    <div class="form-group-checkbox">
+      <input 
+        type="checkbox" 
+        [(ngModel)]="auction.status"
+        name="status"
+        id="status"
+        aria-label="สถานะเปิดใช้งาน"
+        class="form-checkbox">
+      <label for="status" class="checkbox-label">เปิดใช้งาน</label>
+    </div>
+
+    <!-- Auction Categories Section -->
+    <div class="categories-section">
+      <h3 class="categories-title">หมวดหมู่การประมูล</h3>
+      
+      <!-- Add Main Category Button -->
+      <button 
+        type="button" 
+        (click)="addMainCategory()"
+        *ngIf="!showMainCategoryForm"
+        class="btn-add-main">
+        + เพิ่มประเภทหลัก
+      </button>
+
+      <!-- Main Category Form -->
+      <div *ngIf="showMainCategoryForm" class="category-form">
+        <label class="category-form-label">เลือกประเภทหลัก:</label>
+        <select (change)="onMainCategorySelect($any($event.target).value)" class="category-select" title="เลือกประเภทหลัก">
+          <option value="">เลือกประเภทหลัก</option>
+          <option *ngFor="let category of mainCategories" [value]="category.id">
+            {{category.categoryName}}
+          </option>
+        </select>
+        <button 
+          type="button" 
+          (click)="showMainCategoryForm = false"
+          class="btn-cancel">
+          ยกเลิก
+        </button>
+      </div>
+
+      <!-- Display Added Categories -->
+      <div *ngFor="let mainCat of auctionCategories; let mainIndex = index" class="main-category-item">
+        <div class="main-category-header">
+          <strong class="main-category-name">{{mainCat.categoryName}}</strong>
+          <button 
+            type="button" 
+            (click)="removeMainCategory(mainIndex)"
+            class="btn-remove-main">
+            ลบ
+          </button>
+        </div>
+
+        <!-- Sub Categories -->
+        <div *ngFor="let subCat of mainCat.subCategories; let subIndex = index" class="sub-category-item">
+          <span>• {{subCat.categoryName}}</span>
+          <button 
+            type="button" 
+            (click)="removeSubCategory(mainIndex, subIndex)"
+            class="btn-remove-sub">
+            ลบ
+          </button>
+        </div>
+
+        <!-- Add Sub Category Button -->
+        <button 
+          type="button" 
+          (click)="addSubCategory(mainIndex)"
+          *ngIf="!mainCat.showSubCategoryForm"
+          class="btn-add-sub">
+          + เพิ่มประเภทรอง
+        </button>
+
+        <!-- Sub Category Form -->
+        <div *ngIf="mainCat.showSubCategoryForm" class="sub-category-form">
+          <label class="sub-category-form-label">เลือกประเภทรอง:</label>
+          <select (change)="onSubCategorySelect(mainIndex, $any($event.target).value)" class="sub-category-select" title="เลือกประเภทรอง">
+            <option value="">เลือกประเภทรอง</option>
+            <option *ngFor="let subCat of subCategories" [value]="subCat.id">
+              {{subCat.categoryName}}
+            </option>
+          </select>
+          <button 
+            type="button" 
+            (click)="mainCat.showSubCategoryForm = false"
+            class="btn-cancel-sub">
+            ยกเลิก
+          </button>
+        </div>
+      </div>
+      
+      <!-- No Categories Message -->
+      <div *ngIf="auctionCategories.length === 0 && !showMainCategoryForm" class="no-categories">
+        <p>ไม่มีหมวดหมู่การประมูล</p>
+      </div>
+    </div>
+
+    <!-- Criteria Section -->
+    <div class="criteria-section">
+      <h3 class="criteria-title">เกณฑ์การประมูล</h3>
+      
+      <!-- Criteria Selection Checkboxes -->
+      <div class="criteria-selection">
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            id="criteria-debit"
+            name="criteria-debit"
+            [checked]="isCriteriaSelected('debit')"
+            (change)="onCriteriaChange('debit', $any($event.target).checked)"
+            title="สถานะเกณฑ์จำนวนเงินที่วาง"
+            class="criteria-checkbox">
+          <label for="criteria-debit">จำนวนเงินที่วาง (Debit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            id="criteria-credit"
+            name="criteria-credit"
+            [checked]="isCriteriaSelected('credit')"
+            (change)="onCriteriaChange('credit', $any($event.target).checked)"
+            title="สถานะเกณฑ์เครดิต"
+            class="criteria-checkbox">
+          <label for="criteria-credit">เครดิต (Credit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            id="criteria-marginalCredit"
+            name="criteria-marginalCredit"
+            [checked]="isCriteriaSelected('marginalCredit')"
+            (change)="onCriteriaChange('marginalCredit', $any($event.target).checked)"
+            title="สถานะเกณฑ์วงเงินเพิ่มเติม"
+            class="criteria-checkbox">
+          <label for="criteria-marginalCredit">วงเงินเพิ่มเติม (MarginalCredit)</label>
+        </div>
+        
+        <div class="criteria-checkbox-inline">
+          <input 
+            type="checkbox" 
+            id="criteria-auctionAmount"
+            name="criteria-auctionAmount"
+            [checked]="isCriteriaSelected('auctionAmount')"
+            (change)="onCriteriaChange('auctionAmount', $any($event.target).checked)"
+            title="สถานะเกณฑ์ประมูลได้"
+            class="criteria-checkbox">
+          <label for="criteria-auctionAmount">ประมูลได้ (AuctionAmount)</label>
+        </div>
+      </div>
+      
+      <!-- CriteriaUser Details Table -->
+      <div class="criteria-user-details">
+        <div class="criteria-user-table">
+          <div class="criteria-user-header">
+            <div class="user-type-column"></div>
+            <div class="user-column" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <div class="user-info">
+                <div class="user-type-title">{{userType}}</div>
+                <div class="user-name" *ngIf="getUsersByType(userType)[0]">
+                  {{getUsersByType(userType)[0].userName}}
+                </div>
+                <div class="user-name" *ngIf="!getUsersByType(userType)[0]">
+                  ไม่มีผู้ใช้
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Debit Row -->
+          <div class="criteria-user-row debit-row" *ngIf="isCriteriaSelected('debit')">
+            <div class="criteria-user-label">จำนวนเงินที่วาง (Debit)</div>
+            <div class="criteria-user-cell debit-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <!-- Money Type Selection -->
+              <select 
+                [id]="'debitMoneyType-' + i"
+                class="criteria-user-select debit-select"
+                [name]="'debitMoneyType-' + i"
+                [value]="getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId || ''"
+                (change)="onDebitMoneyTypeChange(i, $any($event.target).value)"
+                title="เลือกประเภทเงินสำหรับ {{userType}}"
+                [attr.aria-label]="'เลือกประเภทเงินสำหรับ ' + userType">
+                <option value="">เลือกประเภท</option>
+                <option *ngFor="let moneyType of metaMoneyTypes" [value]="moneyType.id">
+                  {{moneyType.moneyTypeName}}
+                </option>
+              </select>
+              <!-- Amount Input -->
+              <input 
+                [id]="'debitAmount-' + i"
+                type="number" 
+                class="criteria-user-input debit-input"
+                [name]="'debitAmount-' + i"
+                [placeholder]="getPlaceholderForDebit(i)"
+                [value]="getCriteriaUsersData('debit')[i]?.debitAmount || ''"
+                [disabled]="!getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId"
+                (input)="updateCriteriaUserData('debit', i, 'debitAmount', $any($event.target).value)"
+                title="กรอกจำนวนเงินที่วาง Debit สำหรับ {{userType}}"
+                [attr.aria-label]="'จำนวนเงินที่วาง Debit สำหรับ ' + userType">
+            </div>
+          </div>
+
+          <!-- Credit Row -->
+          <div class="criteria-user-row credit-row" *ngIf="isCriteriaSelected('credit')">
+            <div class="criteria-user-label">เครดิต (Credit)</div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="number" 
+                class="criteria-user-input"
+                [name]="'creditAmount-' + i"
+                placeholder="1,000,000.00"
+                [value]="getCriteriaUsersData('credit')[i]?.creditAmount || ''"
+                (input)="updateCriteriaUserData('credit', i, 'creditAmount', $any($event.target).value)"
+                title="จำนวนเครดิตสำหรับ {{userType}}"
+                [attr.aria-label]="'จำนวนเครดิตสำหรับ ' + userType">
+            </div>
+          </div>
+
+          <!-- MarginalCredit Row -->
+          <div class="criteria-user-row marginal-credit-row" *ngIf="isCriteriaSelected('marginalCredit')">
+            <div class="criteria-user-label">วงเงินเพิ่มเติม <span class="small-text">*ไม่เกิน(%)</span></div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="number" 
+                class="criteria-user-input"
+                placeholder="15%"
+                [name]="'marginalCreditPercent-' + i"
+                [value]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditPercent || ''"
+                [disabled]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
+                (input)="updateCriteriaUserData('marginalCredit', i, 'marginalCreditPercent', $any($event.target).value)"
+                title="เปอร์เซ็นต์เพิ่มเติมสำหรับ {{userType}}"
+                [attr.aria-label]="'เปอร์เซ็นต์เพิ่มเติมสำหรับ ' + userType">
+              <div class="criteria-user-checkbox-wrapper">
+                <label [for]="'marginalCreditNonLimit-' + i" class="criteria-user-checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    [id]="'marginalCreditNonLimit-' + i"
+                    [name]="'marginalCreditNonLimit-' + i"
+                    [checked]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
+                    (change)="onMarginalCreditNonLimitChange('marginalCredit', i, $any($event.target).checked)"
+                    title="ไม่จำกัดวงเงินสำหรับ {{userType}}"
+                    [attr.aria-label]="'ไม่จำกัดวงเงินสำหรับ ' + userType">
+                  ไม่จำกัดวงเงิน
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- AuctionAmount Row -->
+          <div class="criteria-user-row auction-amount-row" *ngIf="isCriteriaSelected('auctionAmount')">
+            <div class="criteria-user-label">ประมูลได้ <span class="small-text">*ไม่เกิน(รายการ)</span></div>
+            <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
+              <input 
+                type="number" 
+                class="criteria-user-input"
+                [name]="'auctionAmountValue-' + i"
+                placeholder="1"
+                [value]="getCriteriaUsersData('auctionAmount')[i]?.auctionAmountValue || ''"
+                (input)="updateCriteriaUserData('auctionAmount', i, 'auctionAmountValue', $any($event.target).value)"
+                title="จำนวนรายการประมูลสำหรับ {{userType}}"
+                [attr.aria-label]="'จำนวนรายการประมูลสำหรับ ' + userType">
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button 
+      type="submit" 
+      [disabled]="!auctionForm.form.valid || isLoading"
+      class="submit-btn"
+      [class.disabled]="!auctionForm.form.valid || isLoading">
+      {{isLoading ? 'กำลังอัพเดท...' : 'อัพเดทการประมูล'}}
+    </button>
+  </form>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="message" 
+       class="message"
+       [class.success-message]="isSuccess"
+       [class.error-message]="!isSuccess">
+    {{message}}
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!isLoading && !auction">
+    <h2>ไม่พบข้อมูลประมูล</h2>
+    <p>ไม่สามารถโหลดรายละเอียดประมูลได้</p>
+    <button class="btn-back" (click)="goBack()">กลับไปหน้ารายการ</button>
+  </div>
+</div>
