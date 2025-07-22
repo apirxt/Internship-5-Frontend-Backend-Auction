@@ -1,3 +1,5 @@
+import { CriteriaUser } from './criteria-user.model';
+
 // meta-user.model.ts
 export interface MetaUser {
   id: number;
@@ -7,4 +9,5 @@ export interface MetaUser {
   updateBy: string | null;
   updateDate: string | null;
   isDelete: boolean;
+  criteriaUsers?: CriteriaUser[];
 }

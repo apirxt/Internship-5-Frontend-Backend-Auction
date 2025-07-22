@@ -1,4 +1,6 @@
 import { CriteriaUser } from './criteria-user.model';
+import { AuctionCategory } from './auction-category.model';
+import { MetaCriteriaType } from './meta-criteria-type.model';
 
 export interface Criterion {
   id: number;
@@ -10,5 +12,7 @@ export interface Criterion {
   createDate: string | null;
   updateBy: string | null;
   updateDate: string | null;
+  auctionCategory?: AuctionCategory;
+  metaCriteriaType?: MetaCriteriaType;
   criteriaUsers?: CriteriaUser[];
 }

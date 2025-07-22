@@ -9,19 +9,17 @@
   <div class="loading" *ngIf="isLoading">
     กำลังโหลดข้อมูล...
   </div>
-
-  <!-- Auction Edit Form -->
-  <form (ngSubmit)="onSubmit()" #auctionForm="ngForm" class="auction-form" *ngIf="!isLoading && auction">
+  
+  <form (ngSubmit)="onSubmit()" #auctionForm="ngForm" class="auction-form" *ngIf="!isLoading">
     <!-- Auction Name -->
     <div class="form-group">
       <label class="form-label">ชื่อการประมูล:</label>
       <input 
         type="text" 
-        [(ngModel)]="auction.auctionName"
+        [(ngModel)]="auction.auctionName" 
         name="auctionName"
         required
         placeholder="กรุณาใส่ชื่อการประมูล"
-        aria-label="ชื่อการประมูล"
         class="form-input">
     </div>
 
@@ -29,11 +27,10 @@
     <div class="form-group">
       <label class="form-label">ประเภทการประมูล:</label>
       <select 
-        [(ngModel)]="auction.metaAuctionTypeId"
+        [(ngModel)]="auction.metaAuctionTypeId" 
         name="metaAuctionTypeId"
         required
         title="เลือกประเภทการประมูล"
-        aria-label="ประเภทการประมูล"
         class="form-select">
         <option [ngValue]="null" disabled>เลือกประเภทการประมูล</option>
         <option *ngFor="let type of auctionTypes" [value]="type.id">
@@ -46,11 +43,10 @@
     <div class="form-group">
       <label class="form-label">รายละเอียด:</label>
       <textarea 
-        [(ngModel)]="auction.description"
+        [(ngModel)]="auction.description" 
         name="description"
         rows="4"
         placeholder="กรุณาใส่รายละเอียดการประมูล"
-        aria-label="รายละเอียด"
         class="form-textarea">
       </textarea>
     </div>
@@ -60,11 +56,10 @@
       <label class="form-label">วันที่เริ่มต้น:</label>
       <input 
         type="datetime-local" 
-        [(ngModel)]="auction.startDate"
+        [(ngModel)]="auction.startDate" 
         name="startDate"
         required
         title="เลือกวันที่และเวลาเริ่มต้น"
-        aria-label="วันที่เริ่มต้น"
         class="form-input">
     </div>
 
@@ -73,11 +68,10 @@
       <label class="form-label">วันที่สิ้นสุด:</label>
       <input 
         type="datetime-local" 
-        [(ngModel)]="auction.endDate"
+        [(ngModel)]="auction.endDate" 
         name="endDate"
         required
         title="เลือกวันที่และเวลาสิ้นสุด"
-        aria-label="วันที่สิ้นสุด"
         class="form-input">
     </div>
 
@@ -85,10 +79,9 @@
     <div class="form-group-checkbox">
       <input 
         type="checkbox" 
-        [(ngModel)]="auction.status"
+        [(ngModel)]="auction.status" 
         name="status"
         id="status"
-        aria-label="สถานะเปิดใช้งาน"
         class="form-checkbox">
       <label for="status" class="checkbox-label">เปิดใช้งาน</label>
     </div>
@@ -172,11 +165,6 @@
           </button>
         </div>
       </div>
-      
-      <!-- No Categories Message -->
-      <div *ngIf="auctionCategories.length === 0 && !showMainCategoryForm" class="no-categories">
-        <p>ไม่มีหมวดหมู่การประมูล</p>
-      </div>
     </div>
 
     <!-- Criteria Section -->
@@ -192,7 +180,6 @@
             name="criteria-debit"
             [checked]="isCriteriaSelected('debit')"
             (change)="onCriteriaChange('debit', $any($event.target).checked)"
-            title="สถานะเกณฑ์จำนวนเงินที่วาง"
             class="criteria-checkbox">
           <label for="criteria-debit">จำนวนเงินที่วาง (Debit)</label>
         </div>
@@ -204,7 +191,6 @@
             name="criteria-credit"
             [checked]="isCriteriaSelected('credit')"
             (change)="onCriteriaChange('credit', $any($event.target).checked)"
-            title="สถานะเกณฑ์เครดิต"
             class="criteria-checkbox">
           <label for="criteria-credit">เครดิต (Credit)</label>
         </div>
@@ -216,7 +202,6 @@
             name="criteria-marginalCredit"
             [checked]="isCriteriaSelected('marginalCredit')"
             (change)="onCriteriaChange('marginalCredit', $any($event.target).checked)"
-            title="สถานะเกณฑ์วงเงินเพิ่มเติม"
             class="criteria-checkbox">
           <label for="criteria-marginalCredit">วงเงินเพิ่มเติม (MarginalCredit)</label>
         </div>
@@ -228,7 +213,6 @@
             name="criteria-auctionAmount"
             [checked]="isCriteriaSelected('auctionAmount')"
             (change)="onCriteriaChange('auctionAmount', $any($event.target).checked)"
-            title="สถานะเกณฑ์ประมูลได้"
             class="criteria-checkbox">
           <label for="criteria-auctionAmount">ประมูลได้ (AuctionAmount)</label>
         </div>
@@ -256,21 +240,19 @@
           <div class="criteria-user-row debit-row" *ngIf="isCriteriaSelected('debit')">
             <div class="criteria-user-label">จำนวนเงินที่วาง (Debit)</div>
             <div class="criteria-user-cell debit-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
-              <!-- Money Type Selection -->
               <select 
                 [id]="'debitMoneyType-' + i"
                 class="criteria-user-select debit-select"
                 [name]="'debitMoneyType-' + i"
                 [value]="getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId || ''"
                 (change)="onDebitMoneyTypeChange(i, $any($event.target).value)"
-                title="เลือกประเภทเงินสำหรับ {{userType}}"
+                title="เลือกประเภทเงิน"
                 [attr.aria-label]="'เลือกประเภทเงินสำหรับ ' + userType">
                 <option value="">เลือกประเภท</option>
                 <option *ngFor="let moneyType of metaMoneyTypes" [value]="moneyType.id">
                   {{moneyType.moneyTypeName}}
                 </option>
               </select>
-              <!-- Amount Input -->
               <input 
                 [id]="'debitAmount-' + i"
                 type="number" 
@@ -280,7 +262,7 @@
                 [value]="getCriteriaUsersData('debit')[i]?.debitAmount || ''"
                 [disabled]="!getCriteriaUsersData('debit')[i]?.selectedMoneyTypeId"
                 (input)="updateCriteriaUserData('debit', i, 'debitAmount', $any($event.target).value)"
-                title="กรอกจำนวนเงินที่วาง Debit สำหรับ {{userType}}"
+                title="กรอกจำนวนเงิน"
                 [attr.aria-label]="'จำนวนเงินที่วาง Debit สำหรับ ' + userType">
             </div>
           </div>
@@ -296,8 +278,7 @@
                 placeholder="1,000,000.00"
                 [value]="getCriteriaUsersData('credit')[i]?.creditAmount || ''"
                 (input)="updateCriteriaUserData('credit', i, 'creditAmount', $any($event.target).value)"
-                title="จำนวนเครดิตสำหรับ {{userType}}"
-                [attr.aria-label]="'จำนวนเครดิตสำหรับ ' + userType">
+                [title]="'จำนวนเครดิตสำหรับ ' + userType">
             </div>
           </div>
 
@@ -313,8 +294,7 @@
                 [value]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditPercent || ''"
                 [disabled]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
                 (input)="updateCriteriaUserData('marginalCredit', i, 'marginalCreditPercent', $any($event.target).value)"
-                title="เปอร์เซ็นต์เพิ่มเติมสำหรับ {{userType}}"
-                [attr.aria-label]="'เปอร์เซ็นต์เพิ่มเติมสำหรับ ' + userType">
+                [title]="'เปอร์เซ็นต์เพิ่มเติมสำหรับ ' + userType">
               <div class="criteria-user-checkbox-wrapper">
                 <label [for]="'marginalCreditNonLimit-' + i" class="criteria-user-checkbox-label">
                   <input 
@@ -323,7 +303,7 @@
                     [name]="'marginalCreditNonLimit-' + i"
                     [checked]="getCriteriaUsersData('marginalCredit')[i]?.marginalCreditNonLimit || false"
                     (change)="onMarginalCreditNonLimitChange('marginalCredit', i, $any($event.target).checked)"
-                    title="ไม่จำกัดวงเงินสำหรับ {{userType}}"
+                    [title]="'ไม่จำกัดวงเงินสำหรับ ' + userType"
                     [attr.aria-label]="'ไม่จำกัดวงเงินสำหรับ ' + userType">
                   ไม่จำกัดวงเงิน
                 </label>
@@ -342,8 +322,7 @@
                 placeholder="1"
                 [value]="getCriteriaUsersData('auctionAmount')[i]?.auctionAmountValue || ''"
                 (input)="updateCriteriaUserData('auctionAmount', i, 'auctionAmountValue', $any($event.target).value)"
-                title="จำนวนรายการประมูลสำหรับ {{userType}}"
-                [attr.aria-label]="'จำนวนรายการประมูลสำหรับ ' + userType">
+                [title]="'จำนวนรายการประมูลสำหรับ ' + userType">
             </div>
           </div>
 
@@ -367,12 +346,5 @@
        [class.success-message]="isSuccess"
        [class.error-message]="!isSuccess">
     {{message}}
-  </div>
-
-  <!-- Error State -->
-  <div class="error-state" *ngIf="!isLoading && !auction">
-    <h2>ไม่พบข้อมูลประมูล</h2>
-    <p>ไม่สามารถโหลดรายละเอียดประมูลได้</p>
-    <button class="btn-back" (click)="goBack()">กลับไปหน้ารายการ</button>
   </div>
 </div>

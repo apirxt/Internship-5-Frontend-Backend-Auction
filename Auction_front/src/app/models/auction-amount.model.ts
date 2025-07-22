@@ -1,3 +1,5 @@
+import { CriteriaUser } from './criteria-user.model';
+
 export interface AuctionAmount {
   id: number;
   criteriaUserId: number | null;
@@ -7,4 +9,5 @@ export interface AuctionAmount {
   createDate: string | null;
   updateBy: string | null;
   updateDate: string | null;
+  criteriaUser?: CriteriaUser;
 }

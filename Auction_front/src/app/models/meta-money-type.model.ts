@@ -1,3 +1,5 @@
+import { Debit } from './debit.model';
+
 // meta-money-type.model.ts
 export interface MetaMoneyType {
   id: number;
@@ -7,4 +9,5 @@ export interface MetaMoneyType {
   updateBy: string | null;
   updateDate: string | null;
   isDelete: boolean;
+  debits?: Debit[];
 }

@@ -1,3 +1,6 @@
+import { CriteriaUser } from './criteria-user.model';
+import { MetaMoneyType } from './meta-money-type.model';
+
 export interface Debit {
   id: number;
   criteriaUserId: number | null;
@@ -8,4 +11,6 @@ export interface Debit {
   createDate: string | null;
   updateBy: string | null;
   updateDate: string | null;
+  criteriaUser?: CriteriaUser;
+  metaMoneyType?: MetaMoneyType;
 }

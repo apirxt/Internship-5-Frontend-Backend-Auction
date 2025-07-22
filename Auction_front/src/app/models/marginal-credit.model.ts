@@ -1,3 +1,5 @@
+import { CriteriaUser } from './criteria-user.model';
+
 export interface MarginalCredit {
   id: number;
   criteriaUserId: number | null;
@@ -8,4 +10,5 @@ export interface MarginalCredit {
   createDate: string | null;
   updateBy: string | null;
   updateDate: string | null;
+  criteriaUser?: CriteriaUser;
 }

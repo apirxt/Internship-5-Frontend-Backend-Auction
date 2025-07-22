@@ -1,3 +1,5 @@
+import { Criterion } from './criteria.model';
+
 // meta-criteria-type.model.ts
 export interface MetaCriteriaType {
   id: number;
@@ -7,4 +9,5 @@ export interface MetaCriteriaType {
   updateBy: string | null;
   updateDate: string | null;
   isDelete: boolean;
+  criteria?: Criterion[];
 }

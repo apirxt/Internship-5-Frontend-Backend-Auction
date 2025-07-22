@@ -1,3 +1,5 @@
+import { Auction } from './auction.model';
+
 // meta-auction-type.model.ts
 export interface MetaAuctionType {
   id: number;
@@ -7,4 +9,5 @@ export interface MetaAuctionType {
   updateBy: string | null;
   updateDate: string | null;
   isDelete: boolean;
+  auctions?: Auction[];
 }

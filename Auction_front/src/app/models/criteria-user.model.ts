@@ -2,6 +2,8 @@ import { Debit } from './debit.model';
 import { Credit } from './credit.model';
 import { MarginalCredit } from './marginal-credit.model';
 import { AuctionAmount } from './auction-amount.model';
+import { Criterion } from './criteria.model';
+import { MetaUser } from './meta-user.model';
 
 export interface CriteriaUser {
   id: number;
@@ -12,6 +14,8 @@ export interface CriteriaUser {
   createDate: string | null;
   updateBy: string | null;
   updateDate: string | null;
+  criteria?: Criterion;
+  metaUser?: MetaUser;
   credits?: Credit[];
   debits?: Debit[];
   marginalCredits?: MarginalCredit[];
