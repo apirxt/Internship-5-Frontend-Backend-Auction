@@ -8,10 +8,24 @@ import { MetaCategory } from '../../models/meta-category.model';
 import { MetaCriteriaType } from '../../models/meta-criteria-type.model';
 import { MetaUser } from '../../models/meta-user.model';
 import { MetaMoneyType } from '../../models/meta-money-type.model';
-import { Debit } from '../../models/debit.model';
-import { Credit } from '../../models/credit.model';
-import { MarginalCredit } from '../../models/marginal-credit.model';
-import { AuctionAmount } from '../../models/auction-amount.model';
+
+// Interface for user criteria data
+interface CriteriaUserData {
+  userType?: string;
+  selectedUserId?: number | null;
+  minAmount?: number | null;
+  maxAmount?: number | null;
+  percentage?: number | null;
+  isUseCredit?: boolean;
+  selectedMoneyTypeId?: number | null;
+  debitAmount?: number | null;
+  creditAmount?: number | null;
+  marginalCreditPercent?: number | null;
+  marginalCreditNonLimit?: boolean;
+  auctionAmountValue?: number | null;
+  metaUserId?: number | null;
+  [key: string]: any; // Allow dynamic property access
+}
 
 @Component({
   selector: 'app-auction-create',
@@ -44,16 +58,17 @@ export class AuctionCreateComponent implements OnInit {
   metaCriteriaTypes: MetaCriteriaType[] = [];
   metaUsers: MetaUser[] = [];
   metaMoneyTypes: MetaMoneyType[] = [];
-  debits: Debit[] = [];
-  credits: Credit[] = [];
-  marginalCredits: MarginalCredit[] = [];
-  auctionAmounts: AuctionAmount[] = [];
-  selectedCriteria: { [key: string]: boolean } = {};
-  criteriaUsersData: { [key: string]: any[] } = {};
+  selectedCriteria: { [key: string]: any } = {};
+  criteriaUsersData: { [key: string]: any } = {};
   showMainCategoryForm: boolean = false;
   isLoading: boolean = false;
   message: string = '';
   isSuccess: boolean = false;
+  
+  // For individual category criteria
+  selectedCategoryIndex: number | null = null;
+  selectedSubCategoryIndex: number | null = null;
+  showCriteriaForCategory: string | null = null; // format: "main-0" or "sub-0-1"
 
   private apiUrl = 'http://localhost:5186/api'; // ปรับ URL ตาม backend ของคุณ
 
@@ -139,8 +154,8 @@ export class AuctionCreateComponent implements OnInit {
     this.isLoading = true;
     this.message = '';
 
-    // เตรียมข้อมูล criteria ก่อน
-    const criteria: any[] = [];
+    // เตรียมข้อมูล auction categories พร้อม criteria
+    const auctionCategories: any[] = [];
     
     // Get criteria type IDs from metaCriteriaTypes
     const getCriteriaTypeId = (typeName: string): number => {
@@ -150,127 +165,148 @@ export class AuctionCreateComponent implements OnInit {
       return criteriaType ? criteriaType.id : 1; // Default to 1 if not found
     };
 
-    Object.keys(this.selectedCriteria).forEach(key => {
-      if (this.selectedCriteria[key]) {
-        let criteriaTypeId: number;
-        
-        // Map criteria keys to actual MetaCriteriaType IDs
-        switch(key) {
-          case 'debit':
-            criteriaTypeId = getCriteriaTypeId('debit');
-            break;
-          case 'credit':
-            criteriaTypeId = getCriteriaTypeId('credit');
-            break;
-          case 'marginalCredit':
-            criteriaTypeId = getCriteriaTypeId('marginal');
-            break;
-          case 'auctionAmount':
-            criteriaTypeId = getCriteriaTypeId('amount');
-            break;
-          default:
-            criteriaTypeId = parseInt(key) || 1;
-        }
-        
-        const usersData = this.criteriaUsersData[key] || [];
-        
-        // Create criteria users for each user type (General, Member, VIP)
-        const criteriaUsers: any[] = [];
-        usersData.forEach((userData, index) => {
-          // สร้าง CriteriaUser พื้นฐาน
-          const criteriaUser: any = {
-            id: 0,
-            criteriaId: 0, // จะถูกอัพเดทใน backend
-            metaUserId: userData.metaUserId || null,
-            isDelete: false,
-            createBy: 'system',
-            createDate: new Date().toISOString(),
-            updateBy: null,
-            updateDate: null
-          };
+    // Process each main category
+    this.auctionCategories.forEach((mainCat, mainIndex) => {
+      // Create criteria for main category
+      const mainCategoryCriteria: any[] = [];
+      const mainCategoryKey = `main-${mainIndex}`;
+      
+      if (this.selectedCriteria[mainCategoryKey]) {
+        Object.keys(this.selectedCriteria[mainCategoryKey]).forEach(criteriaType => {
+          if (this.selectedCriteria[mainCategoryKey][criteriaType]) {
+            // Map criteria type to ID
+            let criteriaTypeId: number;
+            switch(criteriaType) {
+              case 'debit':
+                criteriaTypeId = getCriteriaTypeId('debit');
+                break;
+              case 'credit':
+                criteriaTypeId = getCriteriaTypeId('credit');
+                break;
+              case 'marginalCredit':
+                criteriaTypeId = getCriteriaTypeId('marginal');
+                break;
+              case 'auctionAmount':
+                criteriaTypeId = getCriteriaTypeId('amount');
+                break;
+              default:
+                criteriaTypeId = 1;
+            }
 
-          // เพิ่มข้อมูลตามประเภท criteria โดยสร้าง child objects
-          if (key === 'debit' && userData.debitAmount && userData.selectedMoneyTypeId) {
-            criteriaUser.debits = [{
-              id: 0,
-              criteriaUserId: 0,
-              metaMoneyTypeId: userData.selectedMoneyTypeId,
-              cash: parseFloat(userData.debitAmount),
-              isDelete: false,
-              createBy: 'system',
-              createDate: new Date().toISOString(),
-              updateBy: null,
-              updateDate: null
-            }];
+            // Get users data for this criteria type
+            const usersData = this.criteriaUsersData[mainCategoryKey]?.[criteriaType] || [];
+            const criteriaUsers: any[] = [];
+
+            // Process each user type (General, Member, VIP)
+            usersData.forEach((userData: CriteriaUserData, userIndex: number) => {
+              if (!userData) return;
+
+              // Auto-assign metaUserId based on userType index
+              const userTypes = ['General', 'Member', 'VIP'];
+              if (userIndex < userTypes.length) {
+                const userType = userTypes[userIndex];
+                const usersForType = this.getUsersByType(userType);
+                if (usersForType.length > 0) {
+                  userData.metaUserId = usersForType[0].id;
+                }
+              }
+
+              const criteriaUser: any = {
+                id: 0,
+                criteriaId: 0,
+                metaUserId: userData.metaUserId || null,
+                isDelete: false,
+                createBy: 'system',
+                createDate: new Date().toISOString(),
+                updateBy: null,
+                updateDate: null
+              };
+
+              // Add specific criteria data
+              if (criteriaType === 'debit' && userData.debitAmount && userData.selectedMoneyTypeId) {
+                criteriaUser.debits = [{
+                  id: 0,
+                  criteriaUserId: 0,
+                  metaMoneyTypeId: userData.selectedMoneyTypeId,
+                  cash: typeof userData.debitAmount === 'string' ? parseFloat(userData.debitAmount) : userData.debitAmount,
+                  isDelete: false,
+                  createBy: 'system',
+                  createDate: new Date().toISOString(),
+                  updateBy: null,
+                  updateDate: null
+                }];
+              }
+
+              if (criteriaType === 'credit' && userData.creditAmount) {
+                criteriaUser.credits = [{
+                  id: 0,
+                  criteriaUserId: 0,
+                  credit1: typeof userData.creditAmount === 'string' ? parseFloat(userData.creditAmount) : userData.creditAmount,
+                  isDelete: false,
+                  createBy: 'system',
+                  createDate: new Date().toISOString(),
+                  updateBy: null,
+                  updateDate: null
+                }];
+              }
+
+              if (criteriaType === 'marginalCredit' && 
+                  (userData.marginalCreditPercent || userData.marginalCreditNonLimit)) {
+                criteriaUser.marginalCredits = [{
+                  id: 0,
+                  criteriaUserId: 0,
+                  percent: userData.marginalCreditNonLimit ? null : 
+                    (userData.marginalCreditPercent ? 
+                      (typeof userData.marginalCreditPercent === 'string' ? parseFloat(userData.marginalCreditPercent) : userData.marginalCreditPercent) 
+                      : null),
+                  isNonLimit: userData.marginalCreditNonLimit || false,
+                  isDelete: false,
+                  createBy: 'system',
+                  createDate: new Date().toISOString(),
+                  updateBy: null,
+                  updateDate: null
+                }];
+              }
+
+              if (criteriaType === 'auctionAmount' && userData.auctionAmountValue) {
+                criteriaUser.auctionAmounts = [{
+                  id: 0,
+                  criteriaUserId: 0,
+                  amount: typeof userData.auctionAmountValue === 'string' ? parseInt(userData.auctionAmountValue) : userData.auctionAmountValue,
+                  isDelete: false,
+                  createBy: 'system',
+                  createDate: new Date().toISOString(),
+                  updateBy: null,
+                  updateDate: null
+                }];
+              }
+
+              // Add criteria user if it has data
+              if (criteriaUser.debits || criteriaUser.credits || criteriaUser.marginalCredits || criteriaUser.auctionAmounts) {
+                criteriaUsers.push(criteriaUser);
+              }
+            });
+
+            // Add criteria with users
+            if (criteriaUsers.length > 0) {
+              mainCategoryCriteria.push({
+                id: 0,
+                auctionCategoryId: 0,
+                metaCriteriaTypeId: criteriaTypeId,
+                isCheck: true,
+                isDelete: false,
+                createBy: 'system',
+                createDate: new Date().toISOString(),
+                updateBy: null,
+                updateDate: null,
+                criteriaUsers: criteriaUsers
+              });
+            }
           }
-
-          if (key === 'credit' && userData.creditAmount) {
-            criteriaUser.credits = [{
-              id: 0,
-              criteriaUserId: 0,
-              credit1: parseFloat(userData.creditAmount),
-              isDelete: false,
-              createBy: 'system',
-              createDate: new Date().toISOString(),
-              updateBy: null,
-              updateDate: null
-            }];
-          }
-
-          if (key === 'marginalCredit' && 
-              (userData.marginalCreditPercent || userData.marginalCreditNonLimit)) {
-            criteriaUser.marginalCredits = [{
-              id: 0,
-              criteriaUserId: 0,
-              percent: userData.marginalCreditNonLimit ? null : parseFloat(userData.marginalCreditPercent),
-              isNonLimit: userData.marginalCreditNonLimit || false,
-              isDelete: false,
-              createBy: 'system',
-              createDate: new Date().toISOString(),
-              updateBy: null,
-              updateDate: null
-            }];
-          }
-
-          if (key === 'auctionAmount' && userData.auctionAmountValue) {
-            criteriaUser.auctionAmounts = [{
-              id: 0,
-              criteriaUserId: 0,
-              amount: parseInt(userData.auctionAmountValue),
-              isDelete: false,
-              createBy: 'system',
-              createDate: new Date().toISOString(),
-              updateBy: null,
-              updateDate: null
-            }];
-          }
-
-          // เพิ่ม CriteriaUser เฉพาะเมื่อมีข้อมูล
-          if (criteriaUser.debits || criteriaUser.credits || criteriaUser.marginalCredits || criteriaUser.auctionAmounts) {
-            criteriaUsers.push(criteriaUser);
-          }
-        });
-
-        // สร้าง Criteria พร้อม CriteriaUsers
-        criteria.push({
-          id: 0,
-          auctionCategoryId: 0, // จะถูกอัพเดทใน backend
-          metaCriteriaTypeId: criteriaTypeId,
-          isCheck: true,
-          isDelete: false,
-          createBy: 'system',
-          createDate: new Date().toISOString(),
-          updateBy: null,
-          updateDate: null,
-          criteriaUsers: criteriaUsers
         });
       }
-    });
 
-    // เตรียมข้อมูล auction categories พร้อม criteria
-    const auctionCategories: any[] = [];
-    this.auctionCategories.forEach(mainCat => {
-      // เพิ่ม main category พร้อม criteria
+      // Add main category
       auctionCategories.push({
         id: 0,
         metaCategoryId: mainCat.metaCategoryId,
@@ -279,12 +315,147 @@ export class AuctionCreateComponent implements OnInit {
         createDate: new Date().toISOString(),
         updateBy: null,
         updateDate: null,
-        criteria: criteria // เพิ่ม criteria ลงใน main category
+        criteria: mainCategoryCriteria
       });
 
-      // เพิ่ม sub categories (ไม่ต้องมี criteria ซ้ำ)
+      // Process sub categories
       if (mainCat.subCategories && mainCat.subCategories.length > 0) {
-        mainCat.subCategories.forEach((subCat: any) => {
+        mainCat.subCategories.forEach((subCat: any, subIndex: number) => {
+          const subCategoryCriteria: any[] = [];
+          const subCategoryKey = `sub-${mainIndex}-${subIndex}`;
+          
+          if (this.selectedCriteria[subCategoryKey]) {
+            Object.keys(this.selectedCriteria[subCategoryKey]).forEach(criteriaType => {
+              if (this.selectedCriteria[subCategoryKey][criteriaType]) {
+                // Similar logic as main category but for sub category
+                let criteriaTypeId: number;
+                switch(criteriaType) {
+                  case 'debit':
+                    criteriaTypeId = getCriteriaTypeId('debit');
+                    break;
+                  case 'credit':
+                    criteriaTypeId = getCriteriaTypeId('credit');
+                    break;
+                  case 'marginalCredit':
+                    criteriaTypeId = getCriteriaTypeId('marginal');
+                    break;
+                  case 'auctionAmount':
+                    criteriaTypeId = getCriteriaTypeId('amount');
+                    break;
+                  default:
+                    criteriaTypeId = 1;
+                }
+
+                const usersData = this.criteriaUsersData[subCategoryKey]?.[criteriaType] || [];
+                const criteriaUsers: any[] = [];
+
+                usersData.forEach((userData: CriteriaUserData, userIndex: number) => {
+                  if (!userData) return;
+
+                  // Auto-assign metaUserId based on userType index
+                  const userTypes = ['General', 'Member', 'VIP'];
+                  if (userIndex < userTypes.length) {
+                    const userType = userTypes[userIndex];
+                    const usersForType = this.getUsersByType(userType);
+                    if (usersForType.length > 0) {
+                      userData.metaUserId = usersForType[0].id;
+                    }
+                  }
+
+                  const criteriaUser: any = {
+                    id: 0,
+                    criteriaId: 0,
+                    metaUserId: userData.metaUserId || null,
+                    isDelete: false,
+                    createBy: 'system',
+                    createDate: new Date().toISOString(),
+                    updateBy: null,
+                    updateDate: null
+                  };
+
+                  // Add specific criteria data for sub category (same logic as main)
+                  if (criteriaType === 'debit' && userData.debitAmount && userData.selectedMoneyTypeId) {
+                    criteriaUser.debits = [{
+                      id: 0,
+                      criteriaUserId: 0,
+                      metaMoneyTypeId: userData.selectedMoneyTypeId,
+                      cash: typeof userData.debitAmount === 'string' ? parseFloat(userData.debitAmount) : userData.debitAmount,
+                      isDelete: false,
+                      createBy: 'system',
+                      createDate: new Date().toISOString(),
+                      updateBy: null,
+                      updateDate: null
+                    }];
+                  }
+
+                  if (criteriaType === 'credit' && userData.creditAmount) {
+                    criteriaUser.credits = [{
+                      id: 0,
+                      criteriaUserId: 0,
+                      credit1: typeof userData.creditAmount === 'string' ? parseFloat(userData.creditAmount) : userData.creditAmount,
+                      isDelete: false,
+                      createBy: 'system',
+                      createDate: new Date().toISOString(),
+                      updateBy: null,
+                      updateDate: null
+                    }];
+                  }
+
+                  if (criteriaType === 'marginalCredit' && 
+                      (userData.marginalCreditPercent || userData.marginalCreditNonLimit)) {
+                    criteriaUser.marginalCredits = [{
+                      id: 0,
+                      criteriaUserId: 0,
+                      percent: userData.marginalCreditNonLimit ? null : 
+                        (userData.marginalCreditPercent ? 
+                          (typeof userData.marginalCreditPercent === 'string' ? parseFloat(userData.marginalCreditPercent) : userData.marginalCreditPercent) 
+                          : null),
+                      isNonLimit: userData.marginalCreditNonLimit || false,
+                      isDelete: false,
+                      createBy: 'system',
+                      createDate: new Date().toISOString(),
+                      updateBy: null,
+                      updateDate: null
+                    }];
+                  }
+
+                  if (criteriaType === 'auctionAmount' && userData.auctionAmountValue) {
+                    criteriaUser.auctionAmounts = [{
+                      id: 0,
+                      criteriaUserId: 0,
+                      amount: typeof userData.auctionAmountValue === 'string' ? parseInt(userData.auctionAmountValue) : userData.auctionAmountValue,
+                      isDelete: false,
+                      createBy: 'system',
+                      createDate: new Date().toISOString(),
+                      updateBy: null,
+                      updateDate: null
+                    }];
+                  }
+
+                  if (criteriaUser.debits || criteriaUser.credits || criteriaUser.marginalCredits || criteriaUser.auctionAmounts) {
+                    criteriaUsers.push(criteriaUser);
+                  }
+                });
+
+                if (criteriaUsers.length > 0) {
+                  subCategoryCriteria.push({
+                    id: 0,
+                    auctionCategoryId: 0,
+                    metaCriteriaTypeId: criteriaTypeId,
+                    isCheck: true,
+                    isDelete: false,
+                    createBy: 'system',
+                    createDate: new Date().toISOString(),
+                    updateBy: null,
+                    updateDate: null,
+                    criteriaUsers: criteriaUsers
+                  });
+                }
+              }
+            });
+          }
+
+          // Add sub category
           auctionCategories.push({
             id: 0,
             metaCategoryId: subCat.metaCategoryId,
@@ -293,7 +464,7 @@ export class AuctionCreateComponent implements OnInit {
             createDate: new Date().toISOString(),
             updateBy: null,
             updateDate: null,
-            criteria: [] // sub categories ไม่มี criteria
+            criteria: subCategoryCriteria
           });
         });
       }
@@ -306,12 +477,6 @@ export class AuctionCreateComponent implements OnInit {
       createDate: new Date().toISOString(),
       updateDate: new Date().toISOString()
     };
-
-    // Debug: Log the data being sent to the backend
-    console.log('Data being sent to backend:', JSON.stringify(auctionData, null, 2));
-    console.log('Criteria count:', criteria.length);
-    console.log('Selected criteria:', this.selectedCriteria);
-    console.log('Criteria users data:', this.criteriaUsersData);
 
     this.http.post<Auction>(`${this.apiUrl}/Auction`, auctionData)
       .subscribe({
@@ -355,6 +520,9 @@ export class AuctionCreateComponent implements OnInit {
     this.selectedCriteria = {};
     this.criteriaUsersData = {};
     this.showMainCategoryForm = false;
+    this.showCriteriaForCategory = null;
+    this.selectedCategoryIndex = null;
+    this.selectedSubCategoryIndex = null;
   }
 
   addMainCategory(): void {
@@ -396,7 +564,7 @@ export class AuctionCreateComponent implements OnInit {
     const selectedSubCategory = this.subCategories.find(c => c.id === id);
     if (selectedSubCategory) {
       this.auctionCategories[mainCategoryIndex].subCategories.push({
-        id: 0,
+        id: selectedSubCategory.id, // ใช้ id จริงแทน 0
         metaCategoryId: selectedSubCategory.id,
         categoryName: selectedSubCategory.categoryName
       });
@@ -414,72 +582,6 @@ export class AuctionCreateComponent implements OnInit {
     this.auctionCategories[mainIndex].subCategories.splice(subIndex, 1);
   }
 
-  onCriteriaChange(criteriaKey: string | number, isChecked: boolean): void {
-    this.selectedCriteria[criteriaKey] = isChecked;
-    
-    if (isChecked) {
-      // สร้างข้อมูลเริ่มต้นสำหรับ criteria types
-      this.criteriaUsersData[criteriaKey] = [
-        {
-          userType: 'General',
-          selectedUserId: null,
-          minAmount: null,
-          maxAmount: null,
-          percentage: null,
-          isUseCredit: false,
-          selectedMoneyTypeId: null,
-          // ข้อมูลใหม่ตามรูปภาพ
-          debitAmount: null,
-          creditAmount: null,
-          marginalCreditPercent: null,
-          marginalCreditNonLimit: false,
-          auctionAmountValue: null
-        },
-        {
-          userType: 'Member',
-          selectedUserId: null,
-          minAmount: null,
-          maxAmount: null,
-          percentage: null,
-          isUseCredit: false,
-          selectedMoneyTypeId: null,
-          // ข้อมูลใหม่ตามรูปภาพ
-          debitAmount: null,
-          creditAmount: null,
-          marginalCreditPercent: null,
-          marginalCreditNonLimit: false,
-          auctionAmountValue: null
-        },
-        {
-          userType: 'VIP',
-          selectedUserId: null,
-          minAmount: null,
-          maxAmount: null,
-          percentage: null,
-          isUseCredit: false,
-          selectedMoneyTypeId: null,
-          // ข้อมูลใหม่ตามรูปภาพ
-          debitAmount: null,
-          creditAmount: null,
-          marginalCreditPercent: null,
-          marginalCreditNonLimit: false,
-          auctionAmountValue: null
-        }
-      ];
-    } else {
-      // ลบข้อมูลเมื่อไม่เลือก
-      delete this.criteriaUsersData[criteriaKey];
-    }
-  }
-
-  isCriteriaSelected(criteriaKey: string | number): boolean {
-    return this.selectedCriteria[criteriaKey] || false;
-  }
-
-  getCriteriaUsersData(criteriaKey: string | number): any[] {
-    return this.criteriaUsersData[criteriaKey] || [];
-  }
-
   getUsersByType(userType: string): MetaUser[] {
     // Return users based on their position in the array (assuming order: General, Member, VIP)
     const userTypes = ['General', 'Member', 'VIP'];
@@ -495,71 +597,125 @@ export class AuctionCreateComponent implements OnInit {
     return this.metaUsers.slice(startIndex, endIndex);
   }
 
-  updateCriteriaUserData(criteriaKey: string | number, userTypeIndex: number, field: string, value: any): void {
-    if (this.criteriaUsersData[criteriaKey] && this.criteriaUsersData[criteriaKey][userTypeIndex]) {
-      this.criteriaUsersData[criteriaKey][userTypeIndex][field] = value;
+  // Handle main category click
+  onMainCategoryClick(mainIndex: number): void {
+    // Toggle criteria display for main category
+    const categoryKey = `main-${mainIndex}`;
+    if (this.showCriteriaForCategory === categoryKey) {
+      this.showCriteriaForCategory = null;
+    } else {
+      this.showCriteriaForCategory = categoryKey;
+      this.selectedCategoryIndex = mainIndex;
+      this.selectedSubCategoryIndex = null;
       
-      // Auto-assign metaUserId based on userType
-      const userTypes = ['General', 'Member', 'VIP'];
-      if (userTypeIndex < userTypes.length) {
-        const userType = userTypes[userTypeIndex];
-        const usersForType = this.getUsersByType(userType);
-        if (usersForType.length > 0) {
-          this.criteriaUsersData[criteriaKey][userTypeIndex].metaUserId = usersForType[0].id;
-        }
-      }
+      // Initialize criteria data for this category if not exists
+      this.initializeCriteriaForCategory(categoryKey);
     }
   }
 
-  onMarginalCreditNonLimitChange(criteriaKey: string | number, userTypeIndex: number, isChecked: boolean): void {
-    if (this.criteriaUsersData[criteriaKey] && this.criteriaUsersData[criteriaKey][userTypeIndex]) {
-      // Set the checkbox value
-      this.criteriaUsersData[criteriaKey][userTypeIndex].marginalCreditNonLimit = isChecked;
+  // Handle sub category click
+  onSubCategoryClick(mainIndex: number, subIndex: number): void {
+    // Toggle criteria display for sub category
+    const categoryKey = `sub-${mainIndex}-${subIndex}`;
+    if (this.showCriteriaForCategory === categoryKey) {
+      this.showCriteriaForCategory = null;
+    } else {
+      this.showCriteriaForCategory = categoryKey;
+      this.selectedCategoryIndex = mainIndex;
+      this.selectedSubCategoryIndex = subIndex;
       
-      // If checkbox is checked, clear the percent value and disable input
-      if (isChecked) {
-        this.criteriaUsersData[criteriaKey][userTypeIndex].marginalCreditPercent = null;
-      }
-      
-      // Auto-assign metaUserId based on userType
-      const userTypes = ['General', 'Member', 'VIP'];
-      if (userTypeIndex < userTypes.length) {
-        const userType = userTypes[userTypeIndex];
-        const usersForType = this.getUsersByType(userType);
-        if (usersForType.length > 0) {
-          this.criteriaUsersData[criteriaKey][userTypeIndex].metaUserId = usersForType[0].id;
-        }
-      }
+      // Initialize criteria data for this category if not exists
+      this.initializeCriteriaForCategory(categoryKey);
     }
   }
 
-  // Methods for Debit Money Type handling
-  onDebitMoneyTypeChange(userTypeIndex: number, moneyTypeId: string): void {
-    if (this.criteriaUsersData['debit'] && this.criteriaUsersData['debit'][userTypeIndex]) {
-      const id = parseInt(moneyTypeId);
-      this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId = id || null;
-      
-      // Clear the amount when changing money type
-      this.criteriaUsersData['debit'][userTypeIndex].debitAmount = null;
-      
-      // Auto-assign metaUserId based on userType
-      const userTypes = ['General', 'Member', 'VIP'];
-      if (userTypeIndex < userTypes.length) {
-        const userType = userTypes[userTypeIndex];
-        const usersForType = this.getUsersByType(userType);
-        if (usersForType.length > 0) {
-          this.criteriaUsersData['debit'][userTypeIndex].metaUserId = usersForType[0].id;
-        }
-      }
+  // Initialize criteria data for a specific category
+  initializeCriteriaForCategory(categoryKey: string): void {
+    if (!this.selectedCriteria[categoryKey]) {
+      this.selectedCriteria[categoryKey] = {};
+    }
+    if (!this.criteriaUsersData[categoryKey]) {
+      this.criteriaUsersData[categoryKey] = {};
     }
   }
 
-  getPlaceholderForDebit(userTypeIndex: number): string {
-    if (!this.criteriaUsersData['debit'] || !this.criteriaUsersData['debit'][userTypeIndex]) {
+  // Check if criteria is selected for current category
+  isCriteriaSelectedForCategory(criteriaType: string): boolean {
+    if (!this.showCriteriaForCategory) return false;
+    return this.selectedCriteria[this.showCriteriaForCategory]?.[criteriaType] || false;
+  }
+
+  // Handle criteria change for current category
+  onCriteriaChangeForCategory(criteriaType: string, isChecked: boolean): void {
+    if (!this.showCriteriaForCategory) return;
+    
+    if (!this.selectedCriteria[this.showCriteriaForCategory]) {
+      this.selectedCriteria[this.showCriteriaForCategory] = {};
+    }
+    
+    this.selectedCriteria[this.showCriteriaForCategory][criteriaType] = isChecked;
+    
+    if (isChecked) {
+      this.initializeCriteriaUsersForCategory(this.showCriteriaForCategory, criteriaType);
+    }
+  }
+
+  // Initialize criteria users data for category
+  initializeCriteriaUsersForCategory(categoryKey: string, criteriaType: string): void {
+    if (!this.criteriaUsersData[categoryKey]) {
+      this.criteriaUsersData[categoryKey] = {};
+    }
+    if (!this.criteriaUsersData[categoryKey][criteriaType]) {
+      this.criteriaUsersData[categoryKey][criteriaType] = [
+        { selectedMoneyTypeId: null, debitAmount: null, creditAmount: null, marginalCreditPercent: null, marginalCreditNonLimit: false, auctionAmountValue: null },
+        { selectedMoneyTypeId: null, debitAmount: null, creditAmount: null, marginalCreditPercent: null, marginalCreditNonLimit: false, auctionAmountValue: null },
+        { selectedMoneyTypeId: null, debitAmount: null, creditAmount: null, marginalCreditPercent: null, marginalCreditNonLimit: false, auctionAmountValue: null }
+      ];
+    }
+  }
+
+  // Get criteria users data for current category
+  getCriteriaUsersDataForCategory(criteriaType: string): any[] {
+    if (!this.showCriteriaForCategory) return [];
+    return this.criteriaUsersData[this.showCriteriaForCategory]?.[criteriaType] || [];
+  }
+
+  // Update criteria user data for current category
+  updateCriteriaUserDataForCategory(criteriaType: string, userIndex: number, field: string, value: any): void {
+    if (!this.showCriteriaForCategory) return;
+    
+    if (!this.criteriaUsersData[this.showCriteriaForCategory]?.[criteriaType]?.[userIndex]) {
+      this.initializeCriteriaUsersForCategory(this.showCriteriaForCategory, criteriaType);
+    }
+    
+    this.criteriaUsersData[this.showCriteriaForCategory][criteriaType][userIndex][field] = value;
+  }
+
+  // Debit money type change for category
+  onDebitMoneyTypeChangeForCategory(userIndex: number, moneyTypeId: string): void {
+    if (!this.showCriteriaForCategory) return;
+    this.updateCriteriaUserDataForCategory('debit', userIndex, 'selectedMoneyTypeId', moneyTypeId ? parseInt(moneyTypeId) : null);
+  }
+
+  // Marginal credit non-limit change for category
+  onMarginalCreditNonLimitChangeForCategory(userIndex: number, isChecked: boolean): void {
+    if (!this.showCriteriaForCategory) return;
+    this.updateCriteriaUserDataForCategory('marginalCredit', userIndex, 'marginalCreditNonLimit', isChecked);
+    if (isChecked) {
+      this.updateCriteriaUserDataForCategory('marginalCredit', userIndex, 'marginalCreditPercent', null);
+    }
+  }
+
+  // Get placeholder for debit for category
+  getPlaceholderForDebitForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '';
+    
+    const criteriaData = this.criteriaUsersData[this.showCriteriaForCategory]?.debit?.[userIndex];
+    if (!criteriaData) {
       return 'เลือกประเภทก่อน';
     }
 
-    const selectedMoneyTypeId = this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId;
+    const selectedMoneyTypeId = criteriaData.selectedMoneyTypeId;
     if (!selectedMoneyTypeId) {
       return 'เลือกประเภทก่อน';
     }
@@ -578,17 +734,29 @@ export class AuctionCreateComponent implements OnInit {
     }
   }
 
-  getSelectedMoneyTypeName(userTypeIndex: number): string {
-    if (!this.criteriaUsersData['debit'] || !this.criteriaUsersData['debit'][userTypeIndex]) {
-      return '';
-    }
+  // Get selected money type name for category
+  getSelectedMoneyTypeNameForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '';
+    
+    const criteriaData = this.criteriaUsersData[this.showCriteriaForCategory]?.debit?.[userIndex];
+    if (!criteriaData) return '';
 
-    const selectedMoneyTypeId = this.criteriaUsersData['debit'][userTypeIndex].selectedMoneyTypeId;
-    if (!selectedMoneyTypeId) {
-      return '';
-    }
+    const selectedMoneyTypeId = criteriaData.selectedMoneyTypeId;
+    if (!selectedMoneyTypeId) return '';
 
     const selectedMoneyType = this.metaMoneyTypes.find(mt => mt.id === selectedMoneyTypeId);
     return selectedMoneyType && selectedMoneyType.moneyTypeName ? selectedMoneyType.moneyTypeName : '';
+  }
+
+  // Check if sub category is already selected in the main category
+  isSubCategoryAlreadySelected(mainIndex: number, subCategoryId: number): boolean {
+    if (!this.auctionCategories[mainIndex] || !this.auctionCategories[mainIndex].subCategories) {
+      return false;
+    }
+    
+    // Convert subCategoryId to number for comparison
+    const categoryIdToCheck = Number(subCategoryId);
+    
+    return this.auctionCategories[mainIndex].subCategories.some((subCat: any) => Number(subCat.id) === categoryIdToCheck);
   }
 }

@@ -63,8 +63,7 @@ export class AuctionListComponent implements OnInit {
   }
 
   editAuction(id: number): void {
-    // Navigate to edit form
-    console.log('Edit auction ID:', id);
+    this.router.navigate(['/auction/edit', id]);
   }
 
   deleteAuction(id: number): void {
