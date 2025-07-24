@@ -91,12 +91,22 @@
       <div *ngIf="getDisplayCategories().length > 0">
         <div *ngFor="let mainCat of getDisplayCategories(); let mainIndex = index" class="main-category-item">
           <div class="main-category-header">
-            <strong class="main-category-name">{{mainCat.categoryName}}</strong>
+            <button 
+              type="button"
+              class="main-category-name-btn readonly"
+              (click)="onMainCategoryClick(mainIndex)">
+              {{mainCat.categoryName}}
+            </button>
           </div>
 
           <!-- Sub Categories -->
           <div *ngFor="let subCat of mainCat.subCategories; let subIndex = index" class="sub-category-item">
-            <span>• {{subCat.categoryName}}</span>
+            <button 
+              type="button"
+              class="sub-category-name-btn readonly"
+              (click)="onSubCategoryClick(mainIndex, subIndex)">
+              • {{subCat.categoryName}}
+            </button>
           </div>
         </div>
       </div>
@@ -107,16 +117,24 @@
       </div>
     </div>
 
-    <!-- Criteria Section -->
-    <div class="criteria-section">
-      <h3 class="criteria-title">เกณฑ์การประมูล</h3>
+    <!-- Individual Category Criteria Section -->
+    <div class="criteria-section" *ngIf="showCriteriaForCategory">
+      <h3 class="criteria-title">
+        เกณฑ์การประมูล - 
+        <span *ngIf="showCriteriaForCategory?.startsWith('main-')">
+          {{displayCategories[selectedCategoryIndex!]?.categoryName}}
+        </span>
+        <span *ngIf="showCriteriaForCategory?.startsWith('sub-')">
+          {{displayCategories[selectedCategoryIndex!]?.subCategories[selectedSubCategoryIndex!]?.categoryName}}
+        </span>
+      </h3>
       
       <!-- Criteria Selection Display (Read-only) -->
       <div class="criteria-selection">
         <div class="criteria-checkbox-inline">
           <input 
             type="checkbox" 
-            [checked]="hasDebitCriteria()"
+            [checked]="isCriteriaSelectedForCategory('debit')"
             disabled
             title="สถานะเกณฑ์จำนวนเงินที่วาง"
             class="criteria-checkbox">
@@ -126,7 +144,7 @@
         <div class="criteria-checkbox-inline">
           <input 
             type="checkbox" 
-            [checked]="hasCreditCriteria()"
+            [checked]="isCriteriaSelectedForCategory('credit')"
             disabled
             title="สถานะเกณฑ์เครดิต"
             class="criteria-checkbox">
@@ -136,7 +154,7 @@
         <div class="criteria-checkbox-inline">
           <input 
             type="checkbox" 
-            [checked]="hasMarginalCreditCriteria()"
+            [checked]="isCriteriaSelectedForCategory('marginalCredit')"
             disabled
             title="สถานะเกณฑ์วงเงินเพิ่มเติม"
             class="criteria-checkbox">
@@ -146,7 +164,7 @@
         <div class="criteria-checkbox-inline">
           <input 
             type="checkbox" 
-            [checked]="hasAuctionAmountCriteria()"
+            [checked]="isCriteriaSelectedForCategory('auctionAmount')"
             disabled
             title="สถานะเกณฑ์ประมูลได้"
             class="criteria-checkbox">
@@ -154,7 +172,7 @@
         </div>
       </div>
       
-      <!-- CriteriaUser Details Table (Read-only) -->
+      <!-- CriteriaUser Details Table for Selected Category (Read-only) -->
       <div class="criteria-user-details">
         <div class="criteria-user-table">
           <div class="criteria-user-header">
@@ -163,20 +181,20 @@
               <div class="user-info">
                 <div class="user-type-title">{{userType}}</div>
                 <div class="user-name">
-                  {{getDisplayUserName(userType)}}
+                  {{getDisplayUserNameForCategory(userType)}}
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Debit Row -->
-          <div class="criteria-user-row debit-row" *ngIf="hasDebitCriteria()">
+          <div class="criteria-user-row debit-row" *ngIf="isCriteriaSelectedForCategory('debit')">
             <div class="criteria-user-label">จำนวนเงินที่วาง (Debit)</div>
             <div class="criteria-user-cell debit-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
               <!-- Money Type Display -->
               <input 
                 type="text"
-                [value]="getDebitMoneyType(i)"
+                [value]="getDebitMoneyTypeForCategory(i)"
                 readonly
                 title="ประเภทเงินสำหรับ {{userType}}"
                 class="criteria-user-input readonly"
@@ -184,7 +202,7 @@
               <!-- Amount Display -->
               <input 
                 type="text" 
-                [value]="getDebitAmount(i)"
+                [value]="getDebitAmountForCategory(i)"
                 readonly
                 title="จำนวนเงินที่วาง Debit สำหรับ {{userType}}"
                 class="criteria-user-input readonly"
@@ -193,12 +211,12 @@
           </div>
 
           <!-- Credit Row -->
-          <div class="criteria-user-row credit-row" *ngIf="hasCreditCriteria()">
+          <div class="criteria-user-row credit-row" *ngIf="isCriteriaSelectedForCategory('credit')">
             <div class="criteria-user-label">เครดิต (Credit)</div>
             <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
               <input 
                 type="text" 
-                [value]="getCreditAmount(i)"
+                [value]="getCreditAmountForCategory(i)"
                 readonly
                 title="จำนวนเครดิตสำหรับ {{userType}}"
                 class="criteria-user-input readonly"
@@ -207,12 +225,12 @@
           </div>
 
           <!-- MarginalCredit Row -->
-          <div class="criteria-user-row marginal-credit-row" *ngIf="hasMarginalCreditCriteria()">
+          <div class="criteria-user-row marginal-credit-row" *ngIf="isCriteriaSelectedForCategory('marginalCredit')">
             <div class="criteria-user-label">วงเงินเพิ่มเติม <span class="small-text">*ไม่เกิน(%)</span></div>
             <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
               <input 
                 type="text" 
-                [value]="getMarginalCreditPercent(i)"
+                [value]="getMarginalCreditPercentForCategory(i)"
                 readonly
                 title="เปอร์เซ็นต์เพิ่มเติมสำหรับ {{userType}}"
                 class="criteria-user-input readonly"
@@ -221,7 +239,7 @@
                 <label class="criteria-user-checkbox-label">
                   <input 
                     type="checkbox" 
-                    [checked]="getMarginalCreditNonLimit(i)"
+                    [checked]="getMarginalCreditNonLimitForCategory(i)"
                     disabled
                     title="ไม่จำกัดวงเงินสำหรับ {{userType}}"
                     [attr.aria-label]="'ไม่จำกัดวงเงินสำหรับ ' + userType">
@@ -232,12 +250,12 @@
           </div>
 
           <!-- AuctionAmount Row -->
-          <div class="criteria-user-row auction-amount-row" *ngIf="hasAuctionAmountCriteria()">
+          <div class="criteria-user-row auction-amount-row" *ngIf="isCriteriaSelectedForCategory('auctionAmount')">
             <div class="criteria-user-label">ประมูลได้ <span class="small-text">*ไม่เกิน(รายการ)</span></div>
             <div class="criteria-user-cell" *ngFor="let userType of ['General', 'Member', 'VIP']; let i = index">
               <input 
                 type="text" 
-                [value]="getAuctionAmountValue(i)"
+                [value]="getAuctionAmountValueForCategory(i)"
                 readonly
                 title="จำนวนรายการประมูลสำหรับ {{userType}}"
                 class="criteria-user-input readonly"
@@ -246,6 +264,14 @@
           </div>
 
         </div>
+      </div>
+    </div>
+
+    <!-- Message when no category is selected -->
+    <div class="criteria-section" *ngIf="!showCriteriaForCategory">
+      <h3 class="criteria-title">เกณฑ์การประมูล</h3>
+      <div class="no-category-selected">
+        <p>กรุณาคลิกที่ หมวดหมู่หลัก หรือ หมวดหมู่รอง เพื่อดูเกณฑ์การประมูล</p>
       </div>
     </div>
 

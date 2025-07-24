@@ -31,6 +31,11 @@ export class AuctionDetailComponent implements OnInit {
 
   // Display categories structure like create page
   displayCategories: any[] = [];
+  
+  // For criteria display per category like create page
+  selectedCategoryIndex: number | null = null;
+  selectedSubCategoryIndex: number | null = null;
+  showCriteriaForCategory: string | null = null;
 
   constructor(
     private auctionService: AuctionService,
@@ -71,29 +76,6 @@ export class AuctionDetailComponent implements OnInit {
         
         // Process categories for display
         this.processDisplayCategories();
-        
-        // Debug logging
-        console.log('Auction data:', this.auction);
-        console.log('Categories:', this.auction?.auctionCategories);
-        if (this.auction?.auctionCategories) {
-          this.auction.auctionCategories.forEach((category, catIndex) => {
-            console.log(`Category ${catIndex}:`, category);
-            if (category.criteria) {
-              category.criteria.forEach((criteria, criteriaIndex) => {
-                console.log(`  Criteria ${criteriaIndex}:`, criteria);
-                if (criteria.criteriaUsers) {
-                  criteria.criteriaUsers.forEach((user, userIndex) => {
-                    console.log(`    User ${userIndex}:`, user);
-                    console.log(`      Debits:`, user.debits);
-                    console.log(`      Credits:`, user.credits);
-                    console.log(`      MarginalCredits:`, user.marginalCredits);
-                    console.log(`      AuctionAmounts:`, user.auctionAmounts);
-                  });
-                }
-              });
-            }
-          });
-        }
         
         this.isLoading = false;
       },
@@ -208,7 +190,8 @@ export class AuctionDetailComponent implements OnInit {
             mainCategoryMap.set(categoryId, {
               metaCategoryId: categoryId,
               categoryName: category.categoryName,
-              subCategories: []
+              subCategories: [],
+              hasData: true // Mark that this category has auction data
             });
           }
         } else {
@@ -219,13 +202,15 @@ export class AuctionDetailComponent implements OnInit {
             mainCategoryMap.set(parentId, {
               metaCategoryId: parentId,
               categoryName: parentCategory?.categoryName || 'Unknown',
-              subCategories: []
+              subCategories: [],
+              hasData: false // Parent might not have direct data
             });
           }
           
           mainCategoryMap.get(parentId).subCategories.push({
             metaCategoryId: categoryId,
-            categoryName: category.categoryName
+            categoryName: category.categoryName,
+            hasData: true // Mark that this subcategory has auction data
           });
         }
       }
@@ -237,33 +222,238 @@ export class AuctionDetailComponent implements OnInit {
   getDisplayCategories(): any[] {
     return this.displayCategories;
   }
+  
+  // Category click handlers for criteria display (read-only version)
+  onMainCategoryClick(mainIndex: number): void {
+    this.selectedCategoryIndex = mainIndex;
+    this.selectedSubCategoryIndex = null;
+    this.showCriteriaForCategory = `main-${mainIndex}`;
+  }
+
+  onSubCategoryClick(mainIndex: number, subIndex: number): void {
+    this.selectedCategoryIndex = mainIndex;
+    this.selectedSubCategoryIndex = subIndex;
+    this.showCriteriaForCategory = `sub-${mainIndex}-${subIndex}`;
+  }
+
+  // Get criteria data for specific category (similar to create page)
+  isCriteriaSelectedForCategory(criteriaType: string): boolean {
+    if (!this.showCriteriaForCategory) return false;
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return false;
+
+    // Check if this category has the specified criteria type
+    const criteriaData = this.getCriteriaDataForCategory(categoryData.metaCategoryId, criteriaType);
+    return criteriaData.length > 0;
+  }
+
+  private getCategoryDataForCurrentSelection(): any {
+    if (!this.showCriteriaForCategory || this.selectedCategoryIndex === null) return null;
+    
+    if (this.showCriteriaForCategory.startsWith('main-')) {
+      return this.displayCategories[this.selectedCategoryIndex];
+    } else if (this.showCriteriaForCategory.startsWith('sub-') && this.selectedSubCategoryIndex !== null) {
+      return this.displayCategories[this.selectedCategoryIndex].subCategories[this.selectedSubCategoryIndex];
+    }
+    
+    return null;
+  }
+
+  private getCriteriaDataForCategory(categoryId: number, criteriaType: string): any[] {
+    if (!this.auction?.auctionCategories) return [];
+    
+    const auctionCategory = this.auction.auctionCategories.find(ac => ac.metaCategoryId === categoryId);
+    if (!auctionCategory || !auctionCategory.criteria) return [];
+    
+    const users: any[] = [];
+    auctionCategory.criteria.forEach(criteria => {
+      criteria.criteriaUsers?.forEach(user => {
+        const hasData = this.userHasCriteriaType(user, criteriaType);
+        if (hasData) {
+          users.push(user);
+        }
+      });
+    });
+    
+    return users;
+  }
+
+  private userHasCriteriaType(user: any, criteriaType: string): boolean {
+    switch (criteriaType) {
+      case 'debit':
+        return user.debits && user.debits.length > 0;
+      case 'credit':
+        return user.credits && user.credits.length > 0;
+      case 'marginalCredit':
+        return user.marginalCredits && user.marginalCredits.length > 0;
+      case 'auctionAmount':
+        return user.auctionAmounts && user.auctionAmounts.length > 0;
+      default:
+        return false;
+    }
+  }
 
   // Criteria checking methods
   hasDebitCriteria(): boolean {
+    if (this.showCriteriaForCategory) {
+      return this.isCriteriaSelectedForCategory('debit');
+    }
     const debitUsers = this.getDebitUsers();
-    console.log('Debit users found:', debitUsers.length);
     return debitUsers.length > 0;
   }
 
   hasCreditCriteria(): boolean {
+    if (this.showCriteriaForCategory) {
+      return this.isCriteriaSelectedForCategory('credit');
+    }
     const creditUsers = this.getCreditUsers();
-    console.log('Credit users found:', creditUsers.length);
     return creditUsers.length > 0;
   }
 
   hasMarginalCreditCriteria(): boolean {
+    if (this.showCriteriaForCategory) {
+      return this.isCriteriaSelectedForCategory('marginalCredit');
+    }
     const marginalUsers = this.getMarginalCreditUsers();
-    console.log('Marginal credit users found:', marginalUsers.length);
     return marginalUsers.length > 0;
   }
 
   hasAuctionAmountCriteria(): boolean {
+    if (this.showCriteriaForCategory) {
+      return this.isCriteriaSelectedForCategory('auctionAmount');
+    }
     const auctionUsers = this.getAuctionAmountUsers();
-    console.log('Auction amount users found:', auctionUsers.length);
     return auctionUsers.length > 0;
   }
 
-  // User display methods
+  // Updated methods for category-specific display
+  getDisplayUserNameForCategory(userType: string): string {
+    if (!this.showCriteriaForCategory) return 'ไม่มีผู้ใช้';
+    
+    const userTypes = ['General', 'Member', 'VIP'];
+    const typeIndex = userTypes.indexOf(userType);
+    
+    if (typeIndex === -1) return 'ไม่มีผู้ใช้';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return 'ไม่มีผู้ใช้';
+
+    // Try to get user from any available criteria for this category
+    const allUsers = this.getAllCriteriaUsersForCategory(categoryData.metaCategoryId);
+    
+    if (allUsers.length > typeIndex) {
+      const userId = allUsers[typeIndex]?.metaUserId;
+      if (userId) return this.getUserName(userId);
+    }
+    
+    return 'ไม่มีผู้ใช้';
+  }
+
+  getDebitMoneyTypeForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '-';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return '-';
+    
+    const debitUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'debit');
+    if (debitUsers.length > userIndex && debitUsers[userIndex].debits && debitUsers[userIndex].debits.length > 0) {
+      const debit = debitUsers[userIndex].debits[0];
+      return this.getMoneyTypeName(debit.metaMoneyTypeId);
+    }
+    return '-';
+  }
+
+  getDebitAmountForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '-';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return '-';
+    
+    const debitUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'debit');
+    if (debitUsers.length > userIndex && debitUsers[userIndex].debits && debitUsers[userIndex].debits.length > 0) {
+      const debit = debitUsers[userIndex].debits[0];
+      return this.formatCurrency(debit.cash);
+    }
+    return '-';
+  }
+
+  getCreditAmountForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '-';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return '-';
+    
+    const creditUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'credit');
+    if (creditUsers.length > userIndex && creditUsers[userIndex].credits && creditUsers[userIndex].credits.length > 0) {
+      const credit = creditUsers[userIndex].credits[0];
+      return this.formatCurrency(credit.credit1);
+    }
+    return '-';
+  }
+
+  getMarginalCreditPercentForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '-';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return '-';
+    
+    const marginalUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'marginalCredit');
+    if (marginalUsers.length > userIndex && marginalUsers[userIndex].marginalCredits && marginalUsers[userIndex].marginalCredits.length > 0) {
+      const marginal = marginalUsers[userIndex].marginalCredits[0];
+      if (marginal.isNonLimit) {
+        return 'ไม่จำกัด';
+      }
+      return this.formatPercent(marginal.percent);
+    }
+    return '-';
+  }
+
+  getMarginalCreditNonLimitForCategory(userIndex: number): boolean {
+    if (!this.showCriteriaForCategory) return false;
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return false;
+    
+    const marginalUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'marginalCredit');
+    if (marginalUsers.length > userIndex && marginalUsers[userIndex].marginalCredits && marginalUsers[userIndex].marginalCredits.length > 0) {
+      const marginal = marginalUsers[userIndex].marginalCredits[0];
+      return marginal.isNonLimit || false;
+    }
+    return false;
+  }
+
+  getAuctionAmountValueForCategory(userIndex: number): string {
+    if (!this.showCriteriaForCategory) return '-';
+    
+    const categoryData = this.getCategoryDataForCurrentSelection();
+    if (!categoryData) return '-';
+    
+    const auctionUsers = this.getCriteriaDataForCategory(categoryData.metaCategoryId, 'auctionAmount');
+    if (auctionUsers.length > userIndex && auctionUsers[userIndex].auctionAmounts && auctionUsers[userIndex].auctionAmounts.length > 0) {
+      const amount = auctionUsers[userIndex].auctionAmounts[0];
+      return amount.amount?.toString() || '-';
+    }
+    return '-';
+  }
+
+  private getAllCriteriaUsersForCategory(categoryId: number): any[] {
+    if (!this.auction?.auctionCategories) return [];
+    
+    const auctionCategory = this.auction.auctionCategories.find(ac => ac.metaCategoryId === categoryId);
+    if (!auctionCategory || !auctionCategory.criteria) return [];
+    
+    const users: any[] = [];
+    auctionCategory.criteria.forEach(criteria => {
+      criteria.criteriaUsers?.forEach(user => {
+        users.push(user);
+      });
+    });
+    
+    return users;
+  }
+
+  // User display methods (legacy - fallback when no category selected)
   getDisplayUserName(userType: string): string {
     const userTypes = ['General', 'Member', 'VIP'];
     const typeIndex = userTypes.indexOf(userType);
