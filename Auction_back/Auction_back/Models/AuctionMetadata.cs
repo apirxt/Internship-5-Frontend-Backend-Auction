@@ -52,7 +52,20 @@ namespace Auction_back.Models
 
             if (this.AuctionCategories != null && updateData.AuctionCategories != null)
             {
-                foreach (AuctionCategory cat in this.AuctionCategories)
+                // Get IDs of categories that should remain
+                var updateCategoryIds = updateData.AuctionCategories.Where(c => c.Id > 0).Select(c => c.Id).ToList();
+                
+                // Soft delete categories that are not in the update request
+                foreach (AuctionCategory existingCat in this.AuctionCategories.Where(c => c.Id > 0 && !updateCategoryIds.Contains(c.Id)))
+                {
+                    existingCat.IsDelete = true;
+                    existingCat.UpdateBy = "Edit";
+                    existingCat.UpdateDate = datenow;
+                    context.AuctionCategories.Update(existingCat);
+                }
+
+                // Update existing categories
+                foreach (AuctionCategory cat in this.AuctionCategories.Where(c => !c.IsDelete))
                 {
                     AuctionCategory? updateCat = updateData.AuctionCategories.FirstOrDefault(c => c.Id == cat.Id);
                     if (cat.Id > 0 && updateCat != null)
@@ -60,6 +73,7 @@ namespace Auction_back.Models
                         cat.Edit(this, datenow, context, updateCat);
                     }
                 }
+                
                 // Add new AuctionCategory (id == 0)
                 foreach (AuctionCategory newCat in updateData.AuctionCategories.Where(c => c.Id == 0))
                 {

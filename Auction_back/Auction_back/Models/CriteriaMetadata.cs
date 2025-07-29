@@ -39,7 +39,47 @@ namespace Auction_back.Models
 
             if (this.CriteriaUsers != null && updateData.CriteriaUsers != null)
             {
-                foreach (CriteriaUser criteriaUser in this.CriteriaUsers)
+                // Get IDs of criteria users that should remain
+                var updateCriteriaUserIds = updateData.CriteriaUsers.Where(cu => cu.Id > 0).Select(cu => cu.Id).ToList();
+                
+                // Soft delete criteria users that are not in the update request
+                foreach (CriteriaUser existingCU in this.CriteriaUsers.Where(cu => cu.Id > 0 && !updateCriteriaUserIds.Contains(cu.Id)))
+                {
+                    existingCU.IsDelete = true;
+                    existingCU.UpdateBy = "Edit";
+                    existingCU.UpdateDate = datenow;
+                    
+                    // Soft delete all related sub-entities
+                    foreach (var credit in existingCU.Credits)
+                    {
+                        credit.IsDelete = true;
+                        credit.UpdateBy = "Edit";
+                        credit.UpdateDate = datenow;
+                    }
+                    foreach (var debit in existingCU.Debits)
+                    {
+                        debit.IsDelete = true;
+                        debit.UpdateBy = "Edit";
+                        debit.UpdateDate = datenow;
+                    }
+                    foreach (var marginal in existingCU.MarginalCredits)
+                    {
+                        marginal.IsDelete = true;
+                        marginal.UpdateBy = "Edit";
+                        marginal.UpdateDate = datenow;
+                    }
+                    foreach (var amount in existingCU.AuctionAmounts)
+                    {
+                        amount.IsDelete = true;
+                        amount.UpdateBy = "Edit";
+                        amount.UpdateDate = datenow;
+                    }
+                    
+                    context.CriteriaUsers.Update(existingCU);
+                }
+
+                // Update existing criteria users
+                foreach (CriteriaUser criteriaUser in this.CriteriaUsers.Where(cu => !cu.IsDelete))
                 {
                     CriteriaUser? updateCriteriaUser = updateData.CriteriaUsers.FirstOrDefault(cu => cu.Id == criteriaUser.Id);
                     if (criteriaUser.Id > 0 && updateCriteriaUser != null)
@@ -47,6 +87,7 @@ namespace Auction_back.Models
                         criteriaUser.Edit(this, datenow, context, updateCriteriaUser);
                     }
                 }
+                
                 // Add new CriteriaUser (id == 0)
                 foreach (CriteriaUser newCU in updateData.CriteriaUsers.Where(cu => cu.Id == 0))
                 {
