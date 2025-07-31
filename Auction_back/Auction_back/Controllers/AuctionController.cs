@@ -34,22 +34,22 @@ namespace Auction_back.Controllers
         public ActionResult<Auction> GetAuctionAll()
         {
             List<Auction> auctions = _context.Auctions
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.Credits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.Debits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.MarginalCredits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.AuctionAmounts)
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Credits.Where(cr => !cr.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Debits.Where(d => !d.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.MarginalCredits.Where(mc => !mc.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.AuctionAmounts.Where(aa => !aa.IsDelete))
                 .Include(a => a.MetaAuctionType)
                 .Where(a => !a.IsDelete)
                 .ToList();
@@ -62,22 +62,22 @@ namespace Auction_back.Controllers
         public ActionResult<Auction> GetAuctionById(int id)
         {
             Auction? auction = _context.Auctions
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.Credits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.Debits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.MarginalCredits)
-                .Include(a => a.AuctionCategories)
-                    .ThenInclude(ac => ac.Criteria)
-                        .ThenInclude(c => c.CriteriaUsers)
-                            .ThenInclude(cu => cu.AuctionAmounts)
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Credits.Where(cr => !cr.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Debits.Where(d => !d.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.MarginalCredits.Where(mc => !mc.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.AuctionAmounts.Where(aa => !aa.IsDelete))
                 .Include(a => a.MetaAuctionType)
                 .FirstOrDefault(a => a.Id == id && !a.IsDelete);
 
@@ -124,7 +124,29 @@ namespace Auction_back.Controllers
 
             existingAuction.Edit(_context, auction);
             _context.SaveChanges();
-            return Ok(existingAuction);
+            
+            // Reload the auction with filtered data (excluding soft deleted records)
+            Auction? updatedAuction = _context.Auctions
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Credits.Where(cr => !cr.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.Debits.Where(d => !d.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.MarginalCredits.Where(mc => !mc.IsDelete))
+                .Include(a => a.AuctionCategories.Where(ac => !ac.IsDelete))
+                    .ThenInclude(ac => ac.Criteria.Where(c => !c.IsDelete))
+                        .ThenInclude(c => c.CriteriaUsers.Where(cu => !cu.IsDelete))
+                            .ThenInclude(cu => cu.AuctionAmounts.Where(aa => !aa.IsDelete))
+                .Include(a => a.MetaAuctionType)
+                .FirstOrDefault(a => a.Id == id && !a.IsDelete);
+                
+            return Ok(updatedAuction);
         }
 
         // DELETE: api/Auction/{id}

@@ -34,68 +34,147 @@ namespace Auction_back.Models
             this.UpdateBy = "Edit";
             this.UpdateDate = datenow;
             this.MetaCriteriaTypeId = updateData.MetaCriteriaTypeId;
-            this.IsCheck = updateData.IsCheck;
-            // ... เพิ่มเติม property ที่ต้องการ map
-
-            if (this.CriteriaUsers != null && updateData.CriteriaUsers != null)
+            
+            // Handle IsCheck status changes
+            bool wasChecked = this.IsCheck ?? false;
+            bool nowChecked = updateData.IsCheck ?? false;
+            
+            // Case 1: Uncheck (true -> false) - Keep Criteria record but delete CriteriaUser and related data
+            if (wasChecked && !nowChecked)
             {
-                // Get IDs of criteria users that should remain
-                var updateCriteriaUserIds = updateData.CriteriaUsers.Where(cu => cu.Id > 0).Select(cu => cu.Id).ToList();
+                this.IsCheck = false;
                 
-                // Soft delete criteria users that are not in the update request
-                foreach (CriteriaUser existingCU in this.CriteriaUsers.Where(cu => cu.Id > 0 && !updateCriteriaUserIds.Contains(cu.Id)))
+                // Delete CriteriaUser and all related data
+                if (this.CriteriaUsers != null)
                 {
-                    existingCU.IsDelete = true;
-                    existingCU.UpdateBy = "Edit";
-                    existingCU.UpdateDate = datenow;
-                    
-                    // Soft delete all related sub-entities
-                    foreach (var credit in existingCU.Credits)
+                    foreach (CriteriaUser existingCU in this.CriteriaUsers.Where(cu => !cu.IsDelete))
                     {
-                        credit.IsDelete = true;
-                        credit.UpdateBy = "Edit";
-                        credit.UpdateDate = datenow;
+                        // Soft delete all related sub-entities
+                        foreach (var credit in existingCU.Credits.Where(c => !c.IsDelete))
+                        {
+                            credit.IsDelete = true;
+                            credit.UpdateBy = "Edit";
+                            credit.UpdateDate = datenow;
+                            context.Credits.Update(credit);
+                        }
+                        foreach (var debit in existingCU.Debits.Where(d => !d.IsDelete))
+                        {
+                            debit.IsDelete = true;
+                            debit.UpdateBy = "Edit";
+                            debit.UpdateDate = datenow;
+                            context.Debits.Update(debit);
+                        }
+                        foreach (var marginal in existingCU.MarginalCredits.Where(m => !m.IsDelete))
+                        {
+                            marginal.IsDelete = true;
+                            marginal.UpdateBy = "Edit";
+                            marginal.UpdateDate = datenow;
+                            context.MarginalCredits.Update(marginal);
+                        }
+                        foreach (var amount in existingCU.AuctionAmounts.Where(a => !a.IsDelete))
+                        {
+                            amount.IsDelete = true;
+                            amount.UpdateBy = "Edit";
+                            amount.UpdateDate = datenow;
+                            context.AuctionAmounts.Update(amount);
+                        }
+                        
+                        // Soft delete the CriteriaUser as well
+                        existingCU.IsDelete = true;
+                        existingCU.UpdateBy = "Edit";
+                        existingCU.UpdateDate = datenow;
+                        context.CriteriaUsers.Update(existingCU);
                     }
-                    foreach (var debit in existingCU.Debits)
-                    {
-                        debit.IsDelete = true;
-                        debit.UpdateBy = "Edit";
-                        debit.UpdateDate = datenow;
-                    }
-                    foreach (var marginal in existingCU.MarginalCredits)
-                    {
-                        marginal.IsDelete = true;
-                        marginal.UpdateBy = "Edit";
-                        marginal.UpdateDate = datenow;
-                    }
-                    foreach (var amount in existingCU.AuctionAmounts)
-                    {
-                        amount.IsDelete = true;
-                        amount.UpdateBy = "Edit";
-                        amount.UpdateDate = datenow;
-                    }
-                    
-                    context.CriteriaUsers.Update(existingCU);
-                }
-
-                // Update existing criteria users
-                foreach (CriteriaUser criteriaUser in this.CriteriaUsers.Where(cu => !cu.IsDelete))
-                {
-                    CriteriaUser? updateCriteriaUser = updateData.CriteriaUsers.FirstOrDefault(cu => cu.Id == criteriaUser.Id);
-                    if (criteriaUser.Id > 0 && updateCriteriaUser != null)
-                    {
-                        criteriaUser.Edit(this, datenow, context, updateCriteriaUser);
-                    }
-                }
-                
-                // Add new CriteriaUser (id == 0)
-                foreach (CriteriaUser newCU in updateData.CriteriaUsers.Where(cu => cu.Id == 0))
-                {
-                    newCU.CriteriaId = this.Id;
-                    newCU.Create(this, datenow);
-                    context.CriteriaUsers.Add(newCU);
                 }
             }
+            // Case 2: Check back (false -> true) - Change IsCheck to true and create new CriteriaUser and related data
+            else if (!wasChecked && nowChecked)
+            {
+                this.IsCheck = true;
+                
+                // Create new CriteriaUser and related data from updateData
+                if (updateData.CriteriaUsers != null)
+                {
+                    foreach (CriteriaUser newCU in updateData.CriteriaUsers)
+                    {
+                        newCU.CriteriaId = this.Id;
+                        newCU.Create(this, datenow);
+                        context.CriteriaUsers.Add(newCU);
+                    }
+                }
+            }
+            // Case 3: Both checked (true -> true) - Normal update
+            else if (wasChecked && nowChecked)
+            {
+                this.IsCheck = updateData.IsCheck;
+                
+                if (this.CriteriaUsers != null && updateData.CriteriaUsers != null)
+                {
+                    // Get IDs of criteria users that should remain
+                    var updateCriteriaUserIds = updateData.CriteriaUsers.Where(cu => cu.Id > 0).Select(cu => cu.Id).ToList();
+                    
+                    // Soft delete criteria users that are not in the update request
+                    foreach (CriteriaUser existingCU in this.CriteriaUsers.Where(cu => cu.Id > 0 && !updateCriteriaUserIds.Contains(cu.Id)))
+                    {
+                        existingCU.IsDelete = true;
+                        existingCU.UpdateBy = "Edit";
+                        existingCU.UpdateDate = datenow;
+                        
+                        // Soft delete all related sub-entities
+                        foreach (var credit in existingCU.Credits)
+                        {
+                            credit.IsDelete = true;
+                            credit.UpdateBy = "Edit";
+                            credit.UpdateDate = datenow;
+                        }
+                        foreach (var debit in existingCU.Debits)
+                        {
+                            debit.IsDelete = true;
+                            debit.UpdateBy = "Edit";
+                            debit.UpdateDate = datenow;
+                        }
+                        foreach (var marginal in existingCU.MarginalCredits)
+                        {
+                            marginal.IsDelete = true;
+                            marginal.UpdateBy = "Edit";
+                            marginal.UpdateDate = datenow;
+                        }
+                        foreach (var amount in existingCU.AuctionAmounts)
+                        {
+                            amount.IsDelete = true;
+                            amount.UpdateBy = "Edit";
+                            amount.UpdateDate = datenow;
+                        }
+                        
+                        context.CriteriaUsers.Update(existingCU);
+                    }
+
+                    // Update existing criteria users
+                    foreach (CriteriaUser criteriaUser in this.CriteriaUsers.Where(cu => !cu.IsDelete))
+                    {
+                        CriteriaUser? updateCriteriaUser = updateData.CriteriaUsers.FirstOrDefault(cu => cu.Id == criteriaUser.Id);
+                        if (criteriaUser.Id > 0 && updateCriteriaUser != null)
+                        {
+                            criteriaUser.Edit(this, datenow, context, updateCriteriaUser);
+                        }
+                    }
+                    
+                    // Add new CriteriaUser (id == 0)
+                    foreach (CriteriaUser newCU in updateData.CriteriaUsers.Where(cu => cu.Id == 0))
+                    {
+                        newCU.CriteriaId = this.Id;
+                        newCU.Create(this, datenow);
+                        context.CriteriaUsers.Add(newCU);
+                    }
+                }
+            }
+            // Case 4: Both unchecked (false -> false) - just update basic properties
+            else
+            {
+                this.IsCheck = updateData.IsCheck;
+            }
+            
+            // Always update the Criteria record itself (never delete it)
             context.Criteria.Update(this);
             return this;
         }

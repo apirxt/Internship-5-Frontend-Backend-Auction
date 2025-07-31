@@ -40,48 +40,20 @@ namespace Auction_back.Models
                 // Get IDs of criteria that should remain
                 var updateCriteriaIds = updateData.Criteria.Where(c => c.Id > 0).Select(c => c.Id).ToList();
                 
-                // Soft delete criteria that are not in the update request
+                // DON'T delete criteria records - just let them handle their own IsCheck logic
+                // Instead, find criteria that are not in updateData and set their IsCheck to false
                 foreach (Criterion existingCriteria in this.Criteria.Where(c => c.Id > 0 && !updateCriteriaIds.Contains(c.Id)))
                 {
-                    existingCriteria.IsDelete = true;
-                    existingCriteria.UpdateBy = "Edit";
-                    existingCriteria.UpdateDate = datenow;
+                    // Create a dummy updateData with IsCheck = false for this criteria
+                    var dummyUpdateCriteria = new Criterion 
+                    { 
+                        Id = existingCriteria.Id,
+                        IsCheck = false,
+                        MetaCriteriaTypeId = existingCriteria.MetaCriteriaTypeId
+                    };
                     
-                    // Also soft delete all related CriteriaUsers and their sub-entities
-                    foreach (var criteriaUser in existingCriteria.CriteriaUsers)
-                    {
-                        criteriaUser.IsDelete = true;
-                        criteriaUser.UpdateBy = "Edit";
-                        criteriaUser.UpdateDate = datenow;
-                        
-                        // Soft delete all related sub-entities
-                        foreach (var credit in criteriaUser.Credits)
-                        {
-                            credit.IsDelete = true;
-                            credit.UpdateBy = "Edit";
-                            credit.UpdateDate = datenow;
-                        }
-                        foreach (var debit in criteriaUser.Debits)
-                        {
-                            debit.IsDelete = true;
-                            debit.UpdateBy = "Edit";
-                            debit.UpdateDate = datenow;
-                        }
-                        foreach (var marginal in criteriaUser.MarginalCredits)
-                        {
-                            marginal.IsDelete = true;
-                            marginal.UpdateBy = "Edit";
-                            marginal.UpdateDate = datenow;
-                        }
-                        foreach (var amount in criteriaUser.AuctionAmounts)
-                        {
-                            amount.IsDelete = true;
-                            amount.UpdateBy = "Edit";
-                            amount.UpdateDate = datenow;
-                        }
-                    }
-                    
-                    context.Criteria.Update(existingCriteria);
+                    // Let the criteria handle its own uncheck logic
+                    existingCriteria.Edit(this, datenow, context, dummyUpdateCriteria);
                 }
 
                 // Update existing criteria
